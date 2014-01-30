@@ -1,6 +1,6 @@
 package Crypt::Sodium;
 
-use 5.010000;
+use 5.018000;
 use strict;
 use warnings;
 
@@ -247,6 +247,6 @@ Michael Gregorowicz, E<lt>mike@mg2.orgE<gt>
 
 Copyright (C) 2014 Michael Gregorowicz
 
-This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.10 or, at your option, any later version of Perl 5 you may have available.
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.18 or, at your option, any later version of Perl 5 you may have available.
 
 =cut
