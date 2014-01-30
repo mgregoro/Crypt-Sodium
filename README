@@ -1,16 +1,13 @@
-Crypt-Sodium version 0.01
+Crypt-Sodium version 0.04
 =========================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Simple wrapper around NaCL functions as provided by libsodium.  crypto_box, crypto_stream, crypto_hash,
+and crypto_sign are all present and accounted for.  None of the specific implementations are exposed,
+only the default implementations are.
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+I'm releasing this, though I don't feel I have any business writing a Crypt:: namespace'd module.  SO,
+if you use it, please use it with caution, and supply me with patches when you notice any security holes.  I
+will do my best to apply them and release new versions promptly.
 
 INSTALLATION
 
@@ -25,13 +22,11 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+  libsodium (download.libsodium.org/libsodium/releases/)
 
 COPYRIGHT AND LICENCE
 
-Put the correct copyright and licence information here.
-
-Copyright (C) 2013 by Academica Project Team
+Copyright (C) 2014 by Michael Gregorowicz
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.18.0 or,
