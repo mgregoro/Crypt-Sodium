@@ -41,7 +41,7 @@ our @EXPORT = qw(
     crypto_box_nonce
 );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use subs qw/
     crypto_stream_KEYBYTES
