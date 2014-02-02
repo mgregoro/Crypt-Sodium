@@ -3,6 +3,7 @@ Makefile.PL
 MANIFEST
 ppport.h
 README
+README.md
 Sodium.xs
 t/Crypt-Sodium.t
 lib/Crypt/Sodium.pm

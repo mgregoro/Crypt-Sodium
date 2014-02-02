@@ -10,7 +10,7 @@ WriteMakefile(
       (ABSTRACT_FROM  => 'lib/Crypt/Sodium.pm', # retrieve abstract from module
        AUTHOR         => 'Academica Project Team <academica@cctest.wayne.edu>') : ()),
     LIBS              => ['-lsodium'], # e.g., '-lm'
-    DEFINE            => '', # e.g., '-DHAVE_SOMETHING'
+    DEFINE            => '-Wno-pointer-sign', # e.g., '-DHAVE_SOMETHING'
     INC               => '-I. -I/usr/local/academica/sys/include', # e.g., '-I. -I/usr/include/other'
 	# Un-comment this if you add C files to link with later:
     # OBJECT            => '$(O_FILES)', # link all the C files too
