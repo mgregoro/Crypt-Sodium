@@ -237,7 +237,22 @@ real_crypto_box(m, mlen, n, pk, sk)
 
         //printf("crypto_box Status is: %d\n", status);
 
-        RETVAL = newSVpv((unsigned char *)c, mlen);
+        // the message is at least this big.
+        unsigned char ciphertext[mlen];
+
+        int clen = 0;
+        int i;
+        for (i = 0; i < mlen; i++) {
+            if ( !(c[i] == 0) || (clen > 0) ) {
+                ciphertext[clen] = c[i];
+                clen++;
+            }
+        }                
+
+        // make sure to terminate
+        ciphertext[clen + 1] = 0;
+
+        RETVAL = newSVpv( ciphertext, clen );
 
     OUTPUT:
         RETVAL

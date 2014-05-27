@@ -41,7 +41,7 @@ our @EXPORT = qw(
     crypto_box_nonce
 );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use subs qw/
     crypto_stream_KEYBYTES
@@ -115,7 +115,7 @@ sub crypto_sign_open {
     my ($sm, $pk) = @_;
 
     unless (length($pk) == crypto_sign_PUBLICKEYBYTES) {
-        die "[fatal]: nonce must be exactly " . crypto_sign_PUBLICKEYBYTES . " bytes long.\n";
+        die "[fatal]: public key must be exactly " . crypto_sign_PUBLICKEYBYTES . " bytes long.\n";
     }
 
     return real_crypto_sign_open($sm, length($sm), $pk);
@@ -125,7 +125,7 @@ sub crypto_sign {
     my ($m, $sk) = @_;
 
     unless (length($sk) == crypto_sign_SECRETKEYBYTES) {
-        die "[fatal]: key must be exactly " . crypto_sign_SECRETKEYBYTES . " bytes long.\n";
+        die "[fatal]: secret key must be exactly " . crypto_sign_SECRETKEYBYTES . " bytes long.\n";
     }
 
     return real_crypto_sign($m, length($m), $sk);
@@ -135,11 +135,11 @@ sub crypto_box_open {
     my ($c, $n, $pk, $sk) = @_;
 
     unless (length($pk) == crypto_box_PUBLICKEYBYTES) {
-        die "[fatal]: nonce must be exactly " . crypto_box_PUBLICKEYBYTES . " bytes long.\n";
+        die "[fatal]: public key must be exactly " . crypto_box_PUBLICKEYBYTES . " bytes long.\n";
     }
 
     unless (length($sk) == crypto_box_SECRETKEYBYTES) {
-        die "[fatal]: key must be exactly " . crypto_box_SECRETKEYBYTES . " bytes long.\n";
+        die "[fatal]: secret key must be exactly " . crypto_box_SECRETKEYBYTES . " bytes long.\n";
     }
 
     return real_crypto_box_open($c, length($c), $n, $pk, $sk);
@@ -149,11 +149,11 @@ sub crypto_box {
     my ($m, $n, $pk, $sk) = @_;
 
     unless (length($pk) == crypto_box_PUBLICKEYBYTES) {
-        die "[fatal]: nonce must be exactly " . crypto_box_PUBLICKEYBYTES . " bytes long.\n";
+        die "[fatal]: public key must be exactly " . crypto_box_PUBLICKEYBYTES . " bytes long.\n";
     }
 
     unless (length($sk) == crypto_box_SECRETKEYBYTES) {
-        die "[fatal]: key must be exactly " . crypto_box_SECRETKEYBYTES . " bytes long.\n";
+        die "[fatal]: secret key must be exactly " . crypto_box_SECRETKEYBYTES . " bytes long.\n";
     }
 
     return real_crypto_box($m, length($m), $n, $pk, $sk);
