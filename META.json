@@ -1,7 +1,7 @@
 {
    "abstract" : "Perl stub for libsodium",
    "author" : [
-      "Academica Project Team <academica@cctest.wayne.edu>"
+      "Michael Gregorowicz <mike@mg2.org>"
    ],
    "dynamic_config" : 1,
    "generated_by" : "ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.120921",
@@ -35,5 +35,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.02"
+   "version" : "0.06"
 }

@@ -1,7 +1,7 @@
 ---
 abstract: 'Perl stub for libsodium'
 author:
-  - 'Academica Project Team <academica@cctest.wayne.edu>'
+  - 'Michael Gregorowicz <mike@mg2.org>'
 build_requires:
   ExtUtils::MakeMaker: 0
 configure_requires:
@@ -18,4 +18,4 @@ no_index:
     - t
     - inc
 requires: {}
-version: 0.02
+version: 0.06
