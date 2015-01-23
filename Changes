@@ -4,3 +4,12 @@ Revision history for Perl extension Crypt::Sodium.
 	- original version; created by h2xs 1.23 with options
 		-A -n Crypt::Sodium
 
+0.05  Mon May 26 15:23:01 2014
+	- fixed RT #95985 (Confusing length error messages) and 
+                RT #95987 (crypto_box() adds zero padding)
+
+0.06  Fri Jan 23 11:37:00 2015
+        - removed Perl 5.18 requirement, it appears build 
+		problems on earlier versions of perl have been
+		fixed.
+

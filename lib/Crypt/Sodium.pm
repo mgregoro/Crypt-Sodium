@@ -1,6 +1,6 @@
 package Crypt::Sodium;
 
-use 5.018000;
+use 5.008000;
 use strict;
 use warnings;
 
@@ -41,7 +41,7 @@ our @EXPORT = qw(
     crypto_box_nonce
 );
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use subs qw/
     crypto_stream_KEYBYTES
