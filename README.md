@@ -1,4 +1,4 @@
-Crypt-Sodium version 0.06
+Crypt-Sodium version 0.07
 =========================
 
 Simple wrapper around NaCL functions as provided by libsodium.  crypto_box, crypto_stream, crypto_hash,
