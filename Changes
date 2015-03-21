@@ -9,7 +9,13 @@ Revision history for Perl extension Crypt::Sodium.
                 RT #95987 (crypto_box() adds zero padding)
 
 0.06  Fri Jan 23 11:37:00 2015
-        - removed Perl 5.18 requirement, it appears build 
-		problems on earlier versions of perl have been
-		fixed.
+    - removed Perl 5.18 requirement, it appears build 
+	  problems on earlier versions of perl have been
+	  fixed.
+
+0.07  Sat Mar 21 01:42:00 2015
+    - fixed RT #102894 (get rid of hand coded padding added
+      for RT #95987, add support for crypto_secretbox(), and
+      crypto_pwhash_scrypt* functions).  thank you for the
+      patches, Tom!
 

@@ -53,6 +53,14 @@ crypto_box_SECRETKEYBYTES()
         RETVAL
 
 SV *
+crypto_box_SEEDBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_box_SEEDBYTES);
+
+    OUTPUT:
+        RETVAL
+
+SV *
 crypto_sign_PUBLICKEYBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_sign_PUBLICKEYBYTES);
@@ -61,12 +69,77 @@ crypto_sign_PUBLICKEYBYTES()
         RETVAL
 
 SV *
+crypto_secretbox_MACBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_secretbox_MACBYTES);
+
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_box_MACBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_box_MACBYTES);
+
+    OUTPUT:
+        RETVAL
+
+
+SV *
 crypto_sign_SECRETKEYBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_sign_SECRETKEYBYTES);
 
     OUTPUT:
         RETVAL
+
+SV *
+crypto_pwhash_SALTBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_SALTBYTES);
+
+    OUTPUT:
+        RETVAL      
+
+SV *
+crypto_pwhash_OPSLIMIT()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+
+    OUTPUT:
+        RETVAL      
+
+SV *
+crypto_pwhash_OPSLIMIT_SENSITIVE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
+
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_MEMLIMIT()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+
+    OUTPUT:
+        RETVAL    
+
+SV *
+crypto_pwhash_MEMLIMIT_SENSITIVE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
+
+    OUTPUT:
+        RETVAL    
+
+SV *
+crypto_pwhash_STRBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_STRBYTES);
+
+    OUTPUT:
+        RETVAL    
 
 SV *
 randombytes_random()
@@ -82,7 +155,7 @@ randombytes_buf(size)
     unsigned long size
 
     CODE:
-        unsigned char * buf[size];
+        unsigned char *buf[size];
         randombytes_buf(buf, size);
         RETVAL = newSVpv((const char * const)buf, size);
     OUTPUT:
@@ -91,8 +164,8 @@ randombytes_buf(size)
 SV *
 real_crypto_stream(clen, n, k)
     unsigned long clen
-    unsigned char * n
-    unsigned char * k
+    unsigned char *n
+    unsigned char *k
 
     CODE:
         unsigned char c[clen];
@@ -104,10 +177,10 @@ real_crypto_stream(clen, n, k)
 
 SV *
 real_crypto_stream_xor(m, clen, n, k)
-    unsigned char * m
+    unsigned char *m
     unsigned long clen
-    unsigned char * n
-    unsigned char * k
+    unsigned char *n
+    unsigned char *k
 
     CODE:
         unsigned char c[clen];
@@ -119,64 +192,22 @@ real_crypto_stream_xor(m, clen, n, k)
 
 SV *
 real_crypto_box_open(c, clen, n, pk, sk)
-    unsigned char * c 
+    unsigned char *c 
     unsigned long clen
-    unsigned char * n
-    unsigned char * pk
-    unsigned char * sk
+    unsigned char *n
+    unsigned char *pk
+    unsigned char *sk
 
     CODE:
-        int padding_required = 0;
-        unsigned long original_clen = clen;
+        unsigned char * m = malloc(clen - crypto_box_MACBYTES);
 
-        int bytes_of_zeroes = crypto_box_BOXZEROBYTES;
-        unsigned char * padding[bytes_of_zeroes];
-        memset(padding, 0, bytes_of_zeroes);
-
-        // check to see if we already have bytes_of_zeroes up front
-        if (memcmp(c, padding, bytes_of_zeroes) != 0) {
-            // some padding is required, let's determine how much.
-            padding_required = 1;
-
-            int bytes_in_a_row = bytes_of_zeroes;
-            for (bytes_in_a_row = bytes_of_zeroes; bytes_in_a_row > 0; --bytes_in_a_row) {
-                if (memcmp(c, padding, bytes_in_a_row) == 0) {
-                    break;
-                }
-            }
-
-            // this is how many zeroes we have to add.
-            bytes_of_zeroes = (bytes_of_zeroes - bytes_in_a_row);
-            clen += bytes_of_zeroes;
-        } 
-
-        unsigned char * m = malloc(clen);
-        unsigned char * padded_c = malloc(clen);
-
-        // do padding if we've determined we have to.
-        if (padding_required == 1) {
-            // set crypto_box_BOXZEROBYTES zeroes at the beginning
-            memset(padded_c, 0, bytes_of_zeroes);
-
-            // copy in our payload (including zeroes it may have come with)
-            memcpy(padded_c + bytes_of_zeroes, c, original_clen);
-        } else {
-            // just copy the message, it's already good to go.
-            memcpy(padded_c, c, clen);
-        }
-
-        int status = crypto_box_open((unsigned char *)m, (const unsigned char*)padded_c, 
+        int status = crypto_box_open_easy((unsigned char *)m, (const unsigned char*)c, 
             (unsigned long long) clen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
 
         //printf("open_crypto_box Status is: %d\n", status);
 
-        // get rid of the zero padding...
-        unsigned char cleartext[(clen - crypto_box_ZEROBYTES) + 1];
-        memcpy( cleartext, &m[crypto_box_ZEROBYTES], clen - crypto_box_ZEROBYTES );
-        cleartext[(clen - crypto_box_ZEROBYTES)] = 0;
-
         if (status == 0) {
-            RETVAL = newSVpv( cleartext, clen - crypto_box_ZEROBYTES );
+            RETVAL = newSVpv( m, clen - crypto_box_MACBYTES );
         } else {
             RETVAL = &PL_sv_undef;
         }
@@ -186,73 +217,71 @@ real_crypto_box_open(c, clen, n, pk, sk)
 
 SV *
 real_crypto_box(m, mlen, n, pk, sk)
-    unsigned char * m 
+    unsigned char *m 
     unsigned long mlen
-    unsigned char * n
-    unsigned char * pk
-    unsigned char * sk
+    unsigned char *n
+    unsigned char *pk
+    unsigned char *sk
 
     CODE:
-        int padding_required = 0;
-        unsigned long original_mlen = mlen;
+        unsigned char *c = malloc(mlen + crypto_box_MACBYTES);
 
-        int bytes_of_zeroes = crypto_box_ZEROBYTES;
-        unsigned char * padding[bytes_of_zeroes];
-        memset(padding, 0, bytes_of_zeroes);
-
-        // check to see if we already have bytes_of_zeroes up front
-        if (memcmp(m, padding, crypto_box_ZEROBYTES) != 0) {
-            // some padding is required, let's determine how much.
-            padding_required = 1;
-
-            int bytes_in_a_row = bytes_of_zeroes;
-            for (bytes_in_a_row = bytes_of_zeroes; bytes_in_a_row > 0; --bytes_in_a_row) {
-                if (memcmp(m, padding, bytes_in_a_row) == 0) {
-                    break;
-                }
-            }
-
-            // this is how many zeroes we have to add.
-            bytes_of_zeroes = (bytes_of_zeroes - bytes_in_a_row);
-            mlen += bytes_of_zeroes;
-        }
-
-        unsigned char * c = malloc(mlen);
-        unsigned char * padded_m = malloc(mlen);
-
-        // do padding if we've determined we have to.
-        if (padding_required == 1) {
-            // set crypto_box_ZEROBYTES zeroes at the beginning
-            memset(padded_m, 0, bytes_of_zeroes);
-
-            // copy in our payload (including zeroes it may have come with)
-            memcpy(padded_m + bytes_of_zeroes, m, original_mlen);
-        } else {
-            // just copy the message, it's already good to go.
-            memcpy(padded_m, m, mlen);
-        }
-
-        int status = crypto_box((unsigned char *)c, (const unsigned char*)padded_m, 
+        int status = crypto_box_easy((unsigned char *)c, (const unsigned char*)m, 
             (unsigned long long) mlen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
 
         //printf("crypto_box Status is: %d\n", status);
 
-        // the message is at least this big.
-        unsigned char ciphertext[mlen];
+        if (status == 0) {
+            RETVAL = newSVpv( c, mlen + crypto_box_MACBYTES );
+        } else {
+            RETVAL = &PL_sv_undef;
+        }   
 
-        int clen = 0;
-        int i;
-        for (i = 0; i < mlen; i++) {
-            if ( !(c[i] == 0) || (clen > 0) ) {
-                ciphertext[clen] = c[i];
-                clen++;
-            }
-        }                
+    OUTPUT:
+        RETVAL
 
-        // make sure to terminate
-        ciphertext[clen + 1] = 0;
 
-        RETVAL = newSVpv( ciphertext, clen );
+SV *
+real_crypto_secretbox_open(c, clen, n, sk)
+    unsigned char *c 
+    unsigned long clen
+    unsigned char *n
+    unsigned char *sk
+
+    CODE:
+        unsigned char *m = malloc(clen - crypto_secretbox_MACBYTES);
+
+        int status = crypto_secretbox_open_easy((unsigned char *)m, (const unsigned char*)c, 
+            (unsigned long long) clen, (const unsigned char*)n, (const unsigned char*)sk);
+
+        if (status == 0) {
+            RETVAL = newSVpv( m, clen - crypto_secretbox_MACBYTES );
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+
+    OUTPUT:
+        RETVAL
+
+
+SV *
+real_crypto_secretbox(m, mlen, n, sk)
+    unsigned char *m 
+    unsigned long mlen
+    unsigned char *n
+    unsigned char *sk
+
+    CODE:
+        unsigned char *c = malloc(mlen + crypto_secretbox_MACBYTES);
+
+        int status = crypto_secretbox_easy((unsigned char *)c, (const unsigned char*)m, 
+            (unsigned long long) mlen, (const unsigned char*)n, (const unsigned char*)sk);
+
+        if (status == 0) {
+            RETVAL = newSVpv( c, mlen + crypto_secretbox_MACBYTES );
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
 
     OUTPUT:
         RETVAL
@@ -353,3 +382,68 @@ real_crypto_sign_open(sm, smlen, pk)
 
     OUTPUT:
         RETVAL
+
+SV *
+real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
+    unsigned long klen
+    unsigned char *p
+    unsigned char *salt
+    unsigned long opslimit
+    unsigned long memlimit
+
+    CODE:
+        unsigned char *k = malloc(klen);
+
+        int status = crypto_pwhash_scryptsalsa208sha256((unsigned char *)k, klen,
+            (unsigned char *)p, strlen(p), (const unsigned char *)salt, opslimit, memlimit);
+
+        if (status == 0) {
+            RETVAL = newSVpv((unsigned char *)k, klen);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+
+    OUTPUT:
+        RETVAL
+
+SV *
+real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
+    unsigned char *p
+    unsigned char *salt
+    unsigned long opslimit
+    unsigned long memlimit
+
+    CODE:
+        unsigned char *hp = malloc(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
+
+        int status = crypto_pwhash_scryptsalsa208sha256_str((unsigned char *)hp, (unsigned char *)p, 
+            strlen(p), opslimit, memlimit);
+
+        if (status == 0) {
+            RETVAL = newSVpv((unsigned char *)hp, crypto_pwhash_scryptsalsa208sha256_STRBYTES);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+
+    OUTPUT:
+        RETVAL
+
+SV *
+real_crypto_pwhash_scrypt_str_verify(hp, p)
+    unsigned char *hp
+    unsigned char *p
+
+    CODE:
+        int status = crypto_pwhash_scryptsalsa208sha256_str_verify((unsigned char *)hp, (unsigned char *)p, 
+            strlen(p));
+
+        if (status == 0) {
+            RETVAL = newSVuv((unsigned int) 1);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+
+    OUTPUT:
+        RETVAL
+
+
