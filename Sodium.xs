@@ -199,12 +199,10 @@ real_crypto_box_open(c, clen, n, pk, sk)
     unsigned char *sk
 
     CODE:
-        unsigned char * m = malloc(clen - crypto_box_MACBYTES);
+        unsigned char *m = malloc(clen - crypto_box_MACBYTES);
 
-        int status = crypto_box_open_easy((unsigned char *)m, (const unsigned char*)c, 
+        int status = crypto_box_open_easy((unsigned char*)m, (const unsigned char*)c, 
             (unsigned long long) clen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
-
-        //printf("open_crypto_box Status is: %d\n", status);
 
         if (status == 0) {
             RETVAL = newSVpv( m, clen - crypto_box_MACBYTES );
@@ -226,10 +224,8 @@ real_crypto_box(m, mlen, n, pk, sk)
     CODE:
         unsigned char *c = malloc(mlen + crypto_box_MACBYTES);
 
-        int status = crypto_box_easy((unsigned char *)c, (const unsigned char*)m, 
+        int status = crypto_box_easy((unsigned char*)c, (const unsigned char*)m, 
             (unsigned long long) mlen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
-
-        //printf("crypto_box Status is: %d\n", status);
 
         if (status == 0) {
             RETVAL = newSVpv( c, mlen + crypto_box_MACBYTES );
@@ -274,7 +270,7 @@ real_crypto_secretbox(m, mlen, n, sk)
     CODE:
         unsigned char *c = malloc(mlen + crypto_secretbox_MACBYTES);
 
-        int status = crypto_secretbox_easy((unsigned char *)c, (const unsigned char*)m, 
+        int status = crypto_secretbox_easy((unsigned char*)c, (const unsigned char*)m, 
             (unsigned long long) mlen, (const unsigned char*)n, (const unsigned char*)sk);
 
         if (status == 0) {
@@ -394,8 +390,8 @@ real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
     CODE:
         unsigned char *k = malloc(klen);
 
-        int status = crypto_pwhash_scryptsalsa208sha256((unsigned char *)k, klen,
-            (unsigned char *)p, strlen(p), (const unsigned char *)salt, opslimit, memlimit);
+        int status = crypto_pwhash_scryptsalsa208sha256((unsigned char*)k, klen,
+            (unsigned char*)p, strlen(p), (const unsigned char*)salt, opslimit, memlimit);
 
         if (status == 0) {
             RETVAL = newSVpv((unsigned char *)k, klen);
@@ -416,7 +412,7 @@ real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
     CODE:
         unsigned char *hp = malloc(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
 
-        int status = crypto_pwhash_scryptsalsa208sha256_str((unsigned char *)hp, (unsigned char *)p, 
+        int status = crypto_pwhash_scryptsalsa208sha256_str((unsigned char*)hp, (unsigned char*)p, 
             strlen(p), opslimit, memlimit);
 
         if (status == 0) {
@@ -434,7 +430,7 @@ real_crypto_pwhash_scrypt_str_verify(hp, p)
     unsigned char *p
 
     CODE:
-        int status = crypto_pwhash_scryptsalsa208sha256_str_verify((unsigned char *)hp, (unsigned char *)p, 
+        int status = crypto_pwhash_scryptsalsa208sha256_str_verify((unsigned char*)hp, (unsigned char*)p, 
             strlen(p));
 
         if (status == 0) {
