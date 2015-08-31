@@ -61,6 +61,14 @@ crypto_box_SEEDBYTES()
         RETVAL
 
 SV *
+crypto_sign_BYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_sign_BYTES);
+
+    OUTPUT:
+        RETVAL
+
+SV *
 crypto_sign_PUBLICKEYBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_sign_PUBLICKEYBYTES);
@@ -142,6 +150,48 @@ crypto_pwhash_STRBYTES()
         RETVAL    
 
 SV *
+crypto_generichash_BYTES()
+    CODE:
+	RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES);
+    OUTPUT:
+	RETVAL
+
+SV *
+crypto_generichash_BYTES_MIN()
+    CODE:
+	RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES_MIN);
+    OUTPUT:
+	RETVAL
+
+SV *
+crypto_generichash_BYTES_MAX()
+    CODE:
+	RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES_MAX);
+    OUTPUT:
+	RETVAL
+
+SV *
+crypto_generichash_KEYBYTES()
+    CODE:
+	RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES);
+    OUTPUT:
+	RETVAL
+
+SV *
+crypto_generichash_KEYBYTES_MIN()
+    CODE:
+	RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES_MIN);
+    OUTPUT:
+	RETVAL
+
+SV *
+crypto_generichash_KEYBYTES_MAX()
+    CODE:
+	RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES_MAX);
+    OUTPUT:
+	RETVAL
+
+SV *
 randombytes_random()
     CODE:
         uint32_t r_bytes = randombytes_random();
@@ -209,6 +259,7 @@ real_crypto_box_open(c, clen, n, pk, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(m);
 
     OUTPUT:
         RETVAL
@@ -232,6 +283,7 @@ real_crypto_box(m, mlen, n, pk, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }   
+	free(c);
 
     OUTPUT:
         RETVAL
@@ -255,6 +307,7 @@ real_crypto_secretbox_open(c, clen, n, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(m);
 
     OUTPUT:
         RETVAL
@@ -278,6 +331,7 @@ real_crypto_secretbox(m, mlen, n, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(c);
 
     OUTPUT:
         RETVAL
@@ -297,6 +351,58 @@ real_crypto_hash(in, inlen)
     
     OUTPUT:
         RETVAL
+
+SV *
+real_crypto_generichash(in, inlen, outlen, key, keylen)
+    unsigned char * in
+    unsigned long inlen
+    size_t outlen
+    unsigned char * key
+    size_t keylen
+
+    CODE:
+	unsigned char out[crypto_generichash_BYTES_MAX];
+	
+	/* always declare failure */
+	int result = -1;
+
+	if (keylen == 0) {
+	    result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, NULL, 0);
+	} else {
+	    result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
+	}
+
+	if (result == 0) {
+	    RETVAL = newSVpv(out, outlen);
+	} else {
+	    RETVAL = &PL_sv_undef;
+	}
+
+    OUTPUT:
+	RETVAL
+
+SV *
+real_crypto_generichash_key(in, outlen, key)
+    unsigned char * in
+    size_t outlen
+    unsigned char * key
+
+    CODE:
+	unsigned char out[crypto_generichash_BYTES_MAX];
+	
+	/* always declare failure */
+	int result = -1;
+
+	result = crypto_generichash(out, outlen, in, length(in), key, length(key));
+
+	if (result == 0) {
+	    RETVAL = newSVuv(1);
+	} else {
+	    RETVAL = &PL_sv_undef;
+	}
+
+    OUTPUT:
+	RETVAL
 
 AV *
 crypto_box_keypair()
@@ -353,9 +459,49 @@ real_crypto_sign(m, mlen, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(sm);
 
     OUTPUT:
         RETVAL
+
+SV *
+real_crypto_sign_detached(m, mlen, sk)
+    unsigned char * m
+    unsigned long mlen
+    unsigned char * sk
+
+    CODE:
+	unsigned char sig[crypto_sign_BYTES];
+        unsigned long long siglen;
+	int status = crypto_sign_detached(sig, &siglen, (const unsigned char *)m, (unsigned long long)mlen,(const unsigned char *) sk);
+	
+	if (status == 0) {
+	    RETVAL = newSVpv((unsigned char *)sig, crypto_sign_BYTES);
+        } else {
+	    RETVAL = &PL_sv_undef;
+        }
+
+    OUTPUT:
+	RETVAL
+
+SV *
+real_crypto_sign_verify_detached(sig, m, mlen, pk)
+    unsigned char * sig
+    unsigned char * m
+    unsigned long mlen
+    unsigned char * pk
+
+    CODE:
+	int status = crypto_sign_verify_detached((const unsigned char *)sig, (const unsigned char *)m, (unsigned long long) mlen, (const unsigned char *)pk);
+
+	if (status == 0) {
+	    RETVAL = newSVuv(1);
+	} else {
+	    RETVAL = &PL_sv_undef;
+	}
+
+     OUTPUT:
+	RETVAL
 
 SV *
 real_crypto_sign_open(sm, smlen, pk)
@@ -375,6 +521,7 @@ real_crypto_sign_open(sm, smlen, pk)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(m);
 
     OUTPUT:
         RETVAL
@@ -398,6 +545,7 @@ real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(k);
 
     OUTPUT:
         RETVAL
@@ -420,6 +568,7 @@ real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
         } else {
             RETVAL = &PL_sv_undef;
         }
+	free(hp);
 
     OUTPUT:
         RETVAL
