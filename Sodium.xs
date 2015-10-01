@@ -8,7 +8,7 @@
 #include "sodium.h"
 
 
-MODULE = Crypt::Sodium		PACKAGE = Crypt::Sodium		
+MODULE = Crypt::Sodium      PACKAGE = Crypt::Sodium     
 
 PROTOTYPES: ENABLE
 
@@ -152,44 +152,44 @@ crypto_pwhash_STRBYTES()
 SV *
 crypto_generichash_BYTES()
     CODE:
-	RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES);
+    RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES);
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 crypto_generichash_BYTES_MIN()
     CODE:
-	RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES_MIN);
+    RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES_MIN);
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 crypto_generichash_BYTES_MAX()
     CODE:
-	RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES_MAX);
+    RETVAL = newSVuv((unsigned int) crypto_generichash_BYTES_MAX);
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 crypto_generichash_KEYBYTES()
     CODE:
-	RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES);
+    RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES);
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 crypto_generichash_KEYBYTES_MIN()
     CODE:
-	RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES_MIN);
+    RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES_MIN);
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 crypto_generichash_KEYBYTES_MAX()
     CODE:
-	RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES_MAX);
+    RETVAL = newSVuv((unsigned int) crypto_generichash_KEYBYTES_MAX);
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 randombytes_random()
@@ -259,7 +259,9 @@ real_crypto_box_open(c, clen, n, pk, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(m);
+        
+        sodium_memzero(m, (clen - crypto_box_MACBYTES));
+        free(m);
 
     OUTPUT:
         RETVAL
@@ -283,7 +285,9 @@ real_crypto_box(m, mlen, n, pk, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }   
-	free(c);
+    
+        sodium_memzero(c, (mlen + crypto_box_MACBYTES));
+        free(c);
 
     OUTPUT:
         RETVAL
@@ -307,7 +311,9 @@ real_crypto_secretbox_open(c, clen, n, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(m);
+    
+        sodium_memzero(m, (clen - crypto_secretbox_MACBYTES));
+        free(m);
 
     OUTPUT:
         RETVAL
@@ -331,7 +337,9 @@ real_crypto_secretbox(m, mlen, n, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(c);
+    
+        sodium_memzero(c, (mlen + crypto_secretbox_MACBYTES));
+        free(c);
 
     OUTPUT:
         RETVAL
@@ -361,25 +369,25 @@ real_crypto_generichash(in, inlen, outlen, key, keylen)
     size_t keylen
 
     CODE:
-	unsigned char out[crypto_generichash_BYTES_MAX];
-	
-	/* always declare failure */
-	int result = -1;
+    unsigned char out[crypto_generichash_BYTES_MAX];
+    
+    /* always declare failure */
+    int result = -1;
 
-	if (keylen == 0) {
-	    result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, NULL, 0);
-	} else {
-	    result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
-	}
+    if (keylen == 0) {
+        result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, NULL, 0);
+    } else {
+        result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
+    }
 
-	if (result == 0) {
-	    RETVAL = newSVpv(out, outlen);
-	} else {
-	    RETVAL = &PL_sv_undef;
-	}
+    if (result == 0) {
+        RETVAL = newSVpv(out, outlen);
+    } else {
+        RETVAL = &PL_sv_undef;
+    }
 
     OUTPUT:
-	RETVAL
+    RETVAL
 
 SV *
 real_crypto_generichash_key(in, inlen, outlen, key, keylen)
@@ -390,21 +398,21 @@ real_crypto_generichash_key(in, inlen, outlen, key, keylen)
     size_t keylen
 
     CODE:
-	unsigned char out[crypto_generichash_BYTES_MAX];
-	
-	/* always declare failure */
-	int result = -1;
+    unsigned char out[crypto_generichash_BYTES_MAX];
+    
+    /* always declare failure */
+    int result = -1;
 
-	result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
+    result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
 
-	if (result == 0) {
-	    RETVAL = newSVuv(1);
-	} else {
-	    RETVAL = &PL_sv_undef;
-	}
+    if (result == 0) {
+        RETVAL = newSVuv(1);
+    } else {
+        RETVAL = &PL_sv_undef;
+    }
 
     OUTPUT:
-	RETVAL
+    RETVAL
 
 AV *
 crypto_box_keypair()
@@ -461,7 +469,9 @@ real_crypto_sign(m, mlen, sk)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(sm);
+        
+        sodium_memzero(sm, (mlen + crypto_sign_BYTES));
+        free(sm);
 
     OUTPUT:
         RETVAL
@@ -473,18 +483,19 @@ real_crypto_sign_detached(m, mlen, sk)
     unsigned char * sk
 
     CODE:
-	unsigned char sig[crypto_sign_BYTES];
-        unsigned long long siglen;
-	int status = crypto_sign_detached(sig, &siglen, (const unsigned char *)m, (unsigned long long)mlen,(const unsigned char *) sk);
-	
-	if (status == 0) {
-	    RETVAL = newSVpv((unsigned char *)sig, crypto_sign_BYTES);
-        } else {
-	    RETVAL = &PL_sv_undef;
-        }
+    unsigned char sig[crypto_sign_BYTES];
+    
+    unsigned long long siglen;
+    int status = crypto_sign_detached(sig, &siglen, (const unsigned char *)m, (unsigned long long)mlen,(const unsigned char *) sk);
+    
+    if (status == 0) {
+        RETVAL = newSVpv((unsigned char *)sig, crypto_sign_BYTES);
+    } else {
+        RETVAL = &PL_sv_undef;
+    }
 
     OUTPUT:
-	RETVAL
+        RETVAL
 
 SV *
 real_crypto_sign_verify_detached(sig, m, mlen, pk)
@@ -494,16 +505,16 @@ real_crypto_sign_verify_detached(sig, m, mlen, pk)
     unsigned char * pk
 
     CODE:
-	int status = crypto_sign_verify_detached((const unsigned char *)sig, (const unsigned char *)m, (unsigned long long) mlen, (const unsigned char *)pk);
+    int status = crypto_sign_verify_detached((const unsigned char *)sig, (const unsigned char *)m, (unsigned long long) mlen, (const unsigned char *)pk);
 
-	if (status == 0) {
-	    RETVAL = newSVuv(1);
-	} else {
-	    RETVAL = &PL_sv_undef;
-	}
+    if (status == 0) {
+        RETVAL = newSVuv(1);
+    } else {
+        RETVAL = &PL_sv_undef;
+    }
 
-     OUTPUT:
-	RETVAL
+    OUTPUT:
+        RETVAL
 
 SV *
 real_crypto_sign_open(sm, smlen, pk)
@@ -523,7 +534,9 @@ real_crypto_sign_open(sm, smlen, pk)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(m);
+        
+        sodium_memzero(m, smlen);
+        free(m);
 
     OUTPUT:
         RETVAL
@@ -547,7 +560,9 @@ real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(k);
+    
+        sodium_memzero(k, klen);
+        free(k);
 
     OUTPUT:
         RETVAL
@@ -570,7 +585,9 @@ real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
         } else {
             RETVAL = &PL_sv_undef;
         }
-	free(hp);
+    
+        sodium_memzero(hp, crypto_pwhash_scryptsalsa208sha256_STRBYTES);
+        free(hp);
 
     OUTPUT:
         RETVAL
