@@ -15,6 +15,8 @@ our @EXPORT = qw(
     real_crypto_sign
     crypto_sign_open
     real_crypto_sign_open
+    crypto_sign_detached
+    crypto_sign_verify_detached
     crypto_box
     real_crypto_box
     crypto_box_open
@@ -25,6 +27,8 @@ our @EXPORT = qw(
     real_crypto_secretbox_open
     crypto_hash
     real_crypto_hash
+    crypto_generichash
+    crypto_generichash_key
     crypto_stream
     real_crypto_stream
     crypto_stream_xor
@@ -42,6 +46,7 @@ our @EXPORT = qw(
     crypto_box_SEEDBYTES
     crypto_sign_PUBLICKEYBYTES
     crypto_sign_SECRETKEYBYTES
+    crypto_sign_BYTES
     crypto_secretbox_MACBYTES
     crypto_stream_key
     crypto_stream_nonce
@@ -54,6 +59,12 @@ our @EXPORT = qw(
     crypto_pwhash_scrypt_str
     crypto_pwhash_scrypt_str_verify
     crypto_box_nonce
+    crypto_generichash_KEYBYTES
+    crypto_generichash_KEYBYTES_MIN
+    crypto_generichash_KEYBYTES_MAX
+    crypto_generichash_BYTES
+    crypto_generichash_BYTES_MIN
+    crypto_generichash_BYTES_MAX
 );
 
 our $VERSION = '0.07';
@@ -69,10 +80,17 @@ use subs qw/
     crypto_secretbox_MACBYTES
     crypto_sign_PUBLICKEYBYTES
     crypto_sign_SECRETKEYBYTES
+    crypto_sign_BYTES
     crypto_pwhash_SALTBYTES
     crypto_pwhash_OPSLIMIT
     crypto_pwhash_MEMLIMIT
     crypto_pwhash_STRBYTES
+    crypto_generichash_KEYBYTES
+    crypto_generichash_KEYBYTES_MIN
+    crypto_generichash_KEYBYTES_MAX
+    crypto_generichash_BYTES
+    crypto_generichash_BYTES_MIN
+    crypto_generichash_BYTES_MAX
 /;
 
 require XSLoader;
@@ -123,6 +141,33 @@ sub crypto_hash {
     return real_crypto_hash($to_hash, length($to_hash));
 }
 
+sub crypto_generichash {
+    my ($to_hash, $outlen) = @_;
+
+    unless (($outlen >= crypto_generichash_BYTES_MIN) &&
+   	    ($outlen <= crypto_generichash_BYTES_MAX)) {
+        die "[fatal]: key must be between " . crypto_generichash_BYTES_MIN . " and " . crypto_generichash_BYTES_MAX . " bytes long.\n";
+    }
+
+    return real_crypto_generichash($to_hash, length($to_hash), $outlen, 0, 0);
+}
+
+sub crypto_generichash_key {
+    my ($to_hash, $outlen, $key) = @_;
+
+    unless (($outlen >= crypto_generichash_BYTES_MIN) &&
+   	    ($outlen <= crypto_generichash_BYTES_MAX)) {
+        die "[fatal]: key must be between " . crypto_generichash_BYTES_MIN . " and " . crypto_generichash_BYTES_MAX . " bytes long.\n";
+    }
+
+    unless ((length($key) >= crypto_generichash_KEYBYTES_MIN) &&
+   	    (length($key) <= crypto_generichash_KEYBYTES_MAX)) {
+        die "[fatal]: key must be between " . crypto_generichash_KEYBYTES_MIN . " and " . crypto_generichash_KEYBYTES_MAX . " bytes long.\n";
+    }
+
+    return real_crypto_generichash($to_hash, length($to_hash), $outlen, $key, length($key));
+}
+
 sub box_keypair {
     my $ar = crypto_box_keypair();
     return (@$ar);
@@ -151,6 +196,26 @@ sub crypto_sign {
     }
 
     return real_crypto_sign($m, length($m), $sk);
+}
+
+sub crypto_sign_detached {
+    my ($m, $sk) = @_;
+
+    unless (length($sk) == crypto_sign_SECRETKEYBYTES) {
+        die "[fatal]: secret key must be exactly " . crypto_sign_SECRETKEYBYTES . " bytes long.\n";
+    }
+
+    return real_crypto_sign_detached($m, length($m), $sk);
+}
+
+sub crypto_sign_verify_detached {
+    my ($sig, $m, $pk) = @_;
+
+    unless (length($pk) == crypto_sign_PUBLICKEYBYTES) {
+        die "[fatal]: public key must be exactly " . crypto_sign_PUBLICKEYBYTES . " bytes long.\n";
+    }
+
+    return real_crypto_sign_verify_detached($sig, $m, length($m), $pk);
 }
 
 sub crypto_box_open {
