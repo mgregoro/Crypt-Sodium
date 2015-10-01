@@ -382,10 +382,12 @@ real_crypto_generichash(in, inlen, outlen, key, keylen)
 	RETVAL
 
 SV *
-real_crypto_generichash_key(in, outlen, key)
+real_crypto_generichash_key(in, inlen, outlen, key, keylen)
     unsigned char * in
+    unsigned long inlen
     size_t outlen
     unsigned char * key
+    size_t keylen
 
     CODE:
 	unsigned char out[crypto_generichash_BYTES_MAX];
@@ -393,7 +395,7 @@ real_crypto_generichash_key(in, outlen, key)
 	/* always declare failure */
 	int result = -1;
 
-	result = crypto_generichash(out, outlen, in, length(in), key, length(key));
+	result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
 
 	if (result == 0) {
 	    RETVAL = newSVuv(1);

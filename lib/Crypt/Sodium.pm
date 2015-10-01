@@ -4,6 +4,8 @@ use 5.008000;
 use strict;
 use warnings;
 
+our $VERSION = '0.08';
+
 require Exporter;
 
 our @ISA = qw(Exporter);
@@ -66,8 +68,6 @@ our @EXPORT = qw(
     crypto_generichash_BYTES_MIN
     crypto_generichash_BYTES_MAX
 );
-
-our $VERSION = '0.07';
 
 use subs qw/
     crypto_stream_KEYBYTES

@@ -19,3 +19,9 @@ Revision history for Perl extension Crypt::Sodium.
       crypto_pwhash_scrypt* functions).  thank you for the
       patches, Tom!
 
+0.08  Thu Oct  1 11:26:31 2015
+    - merged pull request from rdecker adding 
+      crypto_generichash(), crypto_sign_detached(), and 
+      crypto_sign_verify_detached(), and fixing memory leaks
+      in the XS code.  Thank you, Rob!
+      
