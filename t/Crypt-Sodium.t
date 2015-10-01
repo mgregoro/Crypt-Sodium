@@ -38,7 +38,7 @@ is(crypto_box_open($enciphered, $n, $pk1, $sk2), $message, "Testing roundtrip of
 is(crypto_hash($message), crypto_hash($message), "Testing hash comparison");
 is(length(randombytes_buf(24)), 24, "Testing random bytes output");
 
-# test new password hashing functionality
+# test password hashing functionality
 my $cleartext = "abc123";
 my $salt = crypto_pwhash_salt;
 my $key = crypto_pwhash_scrypt($cleartext, $salt);
@@ -48,4 +48,14 @@ my $hp = crypto_pwhash_scrypt_str($cleartext, $salt);
 is(crypto_pwhash_scrypt_str_verify($hp, $cleartext), 1, "test crypto_pwhash_scrypt_str_verify positive");
 is(crypto_pwhash_scrypt_str_verify($hp, $cleartext . "not"), undef, "test crypto_pwhash_scrypt_str_verify negative");
 
+my ($spk, $ssk) = sign_keypair();
+# test sigs
+my $signed = crypto_sign($cleartext, $ssk);
+is(crypto_sign_open($signed, $spk), $cleartext, "verifying crypto_sign signed message");
+
+# test detached sigs
+my $sig = crypto_sign_detached($cleartext, $ssk);
+is(crypto_sign_verify_detached($sig, $cleartext, $spk), 1, "verifying crypto_sign_detached signature");
+
 done_testing();
+
