@@ -249,7 +249,8 @@ real_crypto_box_open(c, clen, n, pk, sk)
     unsigned char *sk
 
     CODE:
-        unsigned char *m = malloc(clen - crypto_box_MACBYTES);
+        sodium_init();
+        unsigned char *m = sodium_malloc(clen - crypto_box_MACBYTES);
 
         int status = crypto_box_open_easy((unsigned char*)m, (const unsigned char*)c, 
             (unsigned long long) clen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
@@ -260,8 +261,7 @@ real_crypto_box_open(c, clen, n, pk, sk)
             RETVAL = &PL_sv_undef;
         }
         
-        sodium_memzero(m, (clen - crypto_box_MACBYTES));
-        free(m);
+        sodium_free(m);
 
     OUTPUT:
         RETVAL
@@ -275,7 +275,8 @@ real_crypto_box(m, mlen, n, pk, sk)
     unsigned char *sk
 
     CODE:
-        unsigned char *c = malloc(mlen + crypto_box_MACBYTES);
+        sodium_init();
+        unsigned char *c = sodium_malloc(mlen + crypto_box_MACBYTES);
 
         int status = crypto_box_easy((unsigned char*)c, (const unsigned char*)m, 
             (unsigned long long) mlen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
@@ -286,8 +287,7 @@ real_crypto_box(m, mlen, n, pk, sk)
             RETVAL = &PL_sv_undef;
         }   
     
-        sodium_memzero(c, (mlen + crypto_box_MACBYTES));
-        free(c);
+        sodium_free(c);
 
     OUTPUT:
         RETVAL
@@ -301,7 +301,8 @@ real_crypto_secretbox_open(c, clen, n, sk)
     unsigned char *sk
 
     CODE:
-        unsigned char *m = malloc(clen - crypto_secretbox_MACBYTES);
+        sodium_init();
+        unsigned char *m = sodium_malloc(clen - crypto_secretbox_MACBYTES);
 
         int status = crypto_secretbox_open_easy((unsigned char *)m, (const unsigned char*)c, 
             (unsigned long long) clen, (const unsigned char*)n, (const unsigned char*)sk);
@@ -312,8 +313,7 @@ real_crypto_secretbox_open(c, clen, n, sk)
             RETVAL = &PL_sv_undef;
         }
     
-        sodium_memzero(m, (clen - crypto_secretbox_MACBYTES));
-        free(m);
+        sodium_free(m);
 
     OUTPUT:
         RETVAL
@@ -327,7 +327,8 @@ real_crypto_secretbox(m, mlen, n, sk)
     unsigned char *sk
 
     CODE:
-        unsigned char *c = malloc(mlen + crypto_secretbox_MACBYTES);
+        sodium_init();
+        unsigned char *c = sodium_malloc(mlen + crypto_secretbox_MACBYTES);
 
         int status = crypto_secretbox_easy((unsigned char*)c, (const unsigned char*)m, 
             (unsigned long long) mlen, (const unsigned char*)n, (const unsigned char*)sk);
@@ -338,8 +339,7 @@ real_crypto_secretbox(m, mlen, n, sk)
             RETVAL = &PL_sv_undef;
         }
     
-        sodium_memzero(c, (mlen + crypto_secretbox_MACBYTES));
-        free(c);
+        sodium_free(c);
 
     OUTPUT:
         RETVAL
@@ -459,7 +459,8 @@ real_crypto_sign(m, mlen, sk)
     unsigned char * sk
 
     CODE:
-        unsigned char * sm = malloc(mlen + crypto_sign_BYTES);
+        sodium_init();
+        unsigned char * sm = sodium_malloc(mlen + crypto_sign_BYTES);
         unsigned long long smlen;
         int status = crypto_sign((unsigned char *)sm, &smlen, (const unsigned char *)m, 
             (unsigned long long)mlen, (const unsigned char *)sk);
@@ -470,8 +471,7 @@ real_crypto_sign(m, mlen, sk)
             RETVAL = &PL_sv_undef;
         }
         
-        sodium_memzero(sm, (mlen + crypto_sign_BYTES));
-        free(sm);
+        sodium_free(sm);
 
     OUTPUT:
         RETVAL
@@ -523,7 +523,8 @@ real_crypto_sign_open(sm, smlen, pk)
     unsigned char * pk
 
     CODE:
-        unsigned char * m = malloc(smlen);
+        sodium_init();
+        unsigned char * m = sodium_malloc(smlen);
         unsigned long long mlen;
 
         int status = crypto_sign_open((unsigned char *)m, &mlen, (const unsigned char *)sm, 
@@ -535,8 +536,7 @@ real_crypto_sign_open(sm, smlen, pk)
             RETVAL = &PL_sv_undef;
         }
         
-        sodium_memzero(m, smlen);
-        free(m);
+        sodium_free(m);
 
     OUTPUT:
         RETVAL
@@ -550,7 +550,8 @@ real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
     unsigned long memlimit
 
     CODE:
-        unsigned char *k = malloc(klen);
+        sodium_init();
+        unsigned char *k = sodium_malloc(klen);
 
         int status = crypto_pwhash_scryptsalsa208sha256((unsigned char*)k, klen,
             (unsigned char*)p, strlen(p), (const unsigned char*)salt, opslimit, memlimit);
@@ -561,8 +562,7 @@ real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
             RETVAL = &PL_sv_undef;
         }
     
-        sodium_memzero(k, klen);
-        free(k);
+        sodium_free(k);
 
     OUTPUT:
         RETVAL
@@ -575,7 +575,8 @@ real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
     unsigned long memlimit
 
     CODE:
-        unsigned char *hp = malloc(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
+        sodium_init();
+        unsigned char *hp = sodium_malloc(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
 
         int status = crypto_pwhash_scryptsalsa208sha256_str((unsigned char*)hp, (unsigned char*)p, 
             strlen(p), opslimit, memlimit);
@@ -586,8 +587,7 @@ real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
             RETVAL = &PL_sv_undef;
         }
     
-        sodium_memzero(hp, crypto_pwhash_scryptsalsa208sha256_STRBYTES);
-        free(hp);
+        sodium_free(hp);
 
     OUTPUT:
         RETVAL

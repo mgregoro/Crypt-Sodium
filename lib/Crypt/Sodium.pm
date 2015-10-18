@@ -336,10 +336,6 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
   and crypto_sign are all present and accounted for.  None of the specific implementations are exposed, 
   only the default implementations are.
 
-  I'm releasing this, though I don't feel I have any business writing a Crypt:: namespace'd module.  SO, 
-  if you use it, please use it with caution, and supply me with patches when you notice any security holes.  I
-  will do my best to apply them and release new versions promptly.
-
 =head1 EXPORTED FUNCTIONS
 
 =over
