@@ -40,7 +40,7 @@ is(length(randombytes_buf(24)), 24, "Testing random bytes output");
 
 # test password hashing functionality
 my $cleartext = "abc123";
-my $salt = crypto_pwhash_salt;
+my $salt = crypto_pwhash_salt();
 my $key = crypto_pwhash_scrypt($cleartext, $salt);
 is($key, crypto_pwhash_scrypt($cleartext, $salt), "sanity check crypto_hash_scrypt");
 

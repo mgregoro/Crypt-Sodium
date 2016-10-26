@@ -85,6 +85,22 @@ crypto_secretbox_MACBYTES()
         RETVAL
 
 SV *
+crypto_secretbox_KEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_secretbox_KEYBYTES);
+
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_secretbox_NONCEBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_secretbox_NONCEBYTES);
+
+    OUTPUT:
+        RETVAL
+
+SV *
 crypto_box_MACBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_box_MACBYTES);

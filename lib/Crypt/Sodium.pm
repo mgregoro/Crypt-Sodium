@@ -11,34 +11,44 @@ require Exporter;
 our @ISA = qw(Exporter);
 
 our @EXPORT = qw(
-    box_keypair
-    sign_keypair
-    crypto_sign
+    real_crypto_stream_xor
     real_crypto_sign
-    crypto_sign_open
     real_crypto_sign_open
+    real_crypto_box
+    real_crypto_hash
+    real_crypto_box_open
+    real_crypto_secretbox
+    real_crypto_secretbox_open
+    real_crypto_stream
+
+    crypto_sign
+    crypto_sign_open
     crypto_sign_detached
     crypto_sign_verify_detached
     crypto_box
-    real_crypto_box
     crypto_box_open
-    real_crypto_box_open
     crypto_secretbox
-    real_crypto_secretbox
     crypto_secretbox_open
-    real_crypto_secretbox_open
     crypto_hash
-    real_crypto_hash
     crypto_generichash
     crypto_generichash_key
     crypto_stream
-    real_crypto_stream
     crypto_stream_xor
-    real_crypto_stream_xor
     crypto_box_keypair
     crypto_sign_keypair
+    crypto_pwhash_scrypt_str
+    crypto_pwhash_scrypt_str_verify
+    crypto_box_nonce
+    crypto_stream_key
+    crypto_stream_nonce
+    crypto_pwhash_salt
+    crypto_pwhash_scrypt
+
     randombytes_buf
     randombytes_random
+    box_keypair
+    sign_keypair
+
     crypto_stream_NONCEBYTES
     crypto_stream_KEYBYTES
     crypto_box_NONCEBYTES
@@ -50,17 +60,12 @@ our @EXPORT = qw(
     crypto_sign_SECRETKEYBYTES
     crypto_sign_BYTES
     crypto_secretbox_MACBYTES
-    crypto_stream_key
-    crypto_stream_nonce
-    crypto_pwhash_salt
-    crypto_pwhash_scrypt
+    crypto_secretbox_KEYBYTES
+    crypto_secretbox_NONCEBYTES
     crypto_pwhash_SALTBYTES
     crypto_pwhash_OPSLIMIT
     crypto_pwhash_MEMLIMIT
     crypto_pwhash_STRBYTES
-    crypto_pwhash_scrypt_str
-    crypto_pwhash_scrypt_str_verify
-    crypto_box_nonce
     crypto_generichash_KEYBYTES
     crypto_generichash_KEYBYTES_MIN
     crypto_generichash_KEYBYTES_MAX
@@ -77,7 +82,9 @@ use subs qw/
     crypto_box_SECRETKEYBYTES
     crypto_box_MACBYTES
     crypto_box_SEEDBYTES
+    crypto_secretbox_KEYBYTES
     crypto_secretbox_MACBYTES
+    crypto_secretbox_NONCEBYTES
     crypto_sign_PUBLICKEYBYTES
     crypto_sign_SECRETKEYBYTES
     crypto_sign_BYTES
@@ -249,8 +256,12 @@ sub crypto_box {
 sub crypto_secretbox_open {
     my ($c, $n, $sk) = @_;
 
-    unless (length($sk) == crypto_box_SECRETKEYBYTES) {
-        die "[fatal]: secret key must be exactly " . crypto_box_SECRETKEYBYTES . " bytes long.\n";
+    unless (length($n) == crypto_secretbox_NONCEBYTES) {
+        die "[fatal]: secretbox nonce must be exactly " . crypto_secretbox_NONCEBYTES . " bytes long.\n";
+    }
+
+    unless (length($sk) == crypto_secretbox_KEYBYTES) {
+        die "[fatal]: secretbox key must be exactly " . crypto_secretbox_KEYBYTES . " bytes long.\n";
     }
 
     return real_crypto_secretbox_open($c, length($c), $n, $sk);
@@ -259,8 +270,12 @@ sub crypto_secretbox_open {
 sub crypto_secretbox {
     my ($m, $n, $sk) = @_;
 
-    unless (length($sk) == crypto_box_SECRETKEYBYTES) {
-        die "[fatal]: secret key must be exactly " . crypto_box_SECRETKEYBYTES . " bytes long.\n";
+    unless (length($n) == crypto_secretbox_NONCEBYTES) {
+        die "[fatal]: secretbox nonce must be exactly " . crypto_secretbox_NONCEBYTES . " bytes long.\n";
+    }
+
+    unless (length($sk) == crypto_secretbox_KEYBYTES) {
+        die "[fatal]: secretbox key must be exactly " . crypto_secretbox_KEYBYTES . " bytes long.\n";
     }
 
     return real_crypto_secretbox($m, length($m), $n, $sk);
@@ -442,6 +457,8 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
  crypto_box_MACBYTES
  crypto_box_SEEDBYTES
  crypto_secretbox_MACBYTES
+ crypto_secretbox_KEYBYTES
+ crypto_secretbox_NONCEBYTES
  crypto_sign_PUBLICKEYBYTES
  crypto_sign_SECRETKEYBYTES
  crypto_pwhash_SALTBYTES
