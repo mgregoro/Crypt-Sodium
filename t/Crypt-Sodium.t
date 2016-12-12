@@ -21,6 +21,7 @@ my $k = crypto_stream_key();
 my $n = crypto_stream_nonce();
 my $enciphered = crypto_stream_xor($message, $n, $k);
 is(crypto_stream_xor($enciphered, $n, $k), $message, "Testing roundtrip of crypto_stream_xor");
+is(crypto_stream_xor(crypto_stream_xor('', $n, $k), $n, $k), '', "Testing roundtrip of ''");
 
 # test crypto secret box stuff
 $k = crypto_stream_key();
@@ -35,6 +36,7 @@ my ($pk2, $sk2) = box_keypair();
 $n = crypto_box_nonce();
 $enciphered = crypto_box($message, $n, $pk2, $sk1);
 is(crypto_box_open($enciphered, $n, $pk1, $sk2), $message, "Testing roundtrip of crypto_box");
+is(crypto_box_open(crypto_box('', $n, $pk2, $sk1), $n, $pk1, $sk2), '', "Testing roundtrip of ''");
 is(crypto_hash($message), crypto_hash($message), "Testing hash comparison");
 is(length(randombytes_buf(24)), 24, "Testing random bytes output");
 

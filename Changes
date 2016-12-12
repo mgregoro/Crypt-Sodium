@@ -25,3 +25,9 @@ Revision history for Perl extension Crypt::Sodium.
       crypto_sign_verify_detached(), and fixing memory leaks
       in the XS code.  Thank you, Rob!
       
+0.09  Mon Dec 12 12:06:20 2016
+   - fixing RT #118956 by applying NEWELLC's patch.  many
+     thanks!  also added assert()'s around sodium_init() 
+     calls to silence clang's warnings about unused return
+     values
+

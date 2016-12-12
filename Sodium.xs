@@ -3,6 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#include "assert.h"
 #include "ppport.h"
 #include "string.h"
 #include "sodium.h"
@@ -251,7 +252,7 @@ real_crypto_stream_xor(m, clen, n, k)
     CODE:
         unsigned char c[clen];
         crypto_stream_xor(c, m, clen, n, k);
-        RETVAL = newSVpv((unsigned char *)c, clen);
+        RETVAL = newSVpvn((unsigned char *)c, clen);
 
     OUTPUT:
         RETVAL
@@ -265,14 +266,14 @@ real_crypto_box_open(c, clen, n, pk, sk)
     unsigned char *sk
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char *m = sodium_malloc(clen - crypto_box_MACBYTES);
 
         int status = crypto_box_open_easy((unsigned char*)m, (const unsigned char*)c, 
             (unsigned long long) clen, (const unsigned char*)n, (const unsigned char*)pk, (const unsigned char*)sk);
 
         if (status == 0) {
-            RETVAL = newSVpv( m, clen - crypto_box_MACBYTES );
+            RETVAL = newSVpvn( m, clen - crypto_box_MACBYTES );
         } else {
             RETVAL = &PL_sv_undef;
         }
@@ -291,7 +292,7 @@ real_crypto_box(m, mlen, n, pk, sk)
     unsigned char *sk
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char *c = sodium_malloc(mlen + crypto_box_MACBYTES);
 
         int status = crypto_box_easy((unsigned char*)c, (const unsigned char*)m, 
@@ -317,7 +318,7 @@ real_crypto_secretbox_open(c, clen, n, sk)
     unsigned char *sk
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char *m = sodium_malloc(clen - crypto_secretbox_MACBYTES);
 
         int status = crypto_secretbox_open_easy((unsigned char *)m, (const unsigned char*)c, 
@@ -343,7 +344,7 @@ real_crypto_secretbox(m, mlen, n, sk)
     unsigned char *sk
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char *c = sodium_malloc(mlen + crypto_secretbox_MACBYTES);
 
         int status = crypto_secretbox_easy((unsigned char*)c, (const unsigned char*)m, 
@@ -475,7 +476,7 @@ real_crypto_sign(m, mlen, sk)
     unsigned char * sk
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char * sm = sodium_malloc(mlen + crypto_sign_BYTES);
         unsigned long long smlen;
         int status = crypto_sign((unsigned char *)sm, &smlen, (const unsigned char *)m, 
@@ -539,7 +540,7 @@ real_crypto_sign_open(sm, smlen, pk)
     unsigned char * pk
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char * m = sodium_malloc(smlen);
         unsigned long long mlen;
 
@@ -566,7 +567,7 @@ real_crypto_pwhash_scrypt(klen, p, salt, opslimit, memlimit)
     unsigned long memlimit
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char *k = sodium_malloc(klen);
 
         int status = crypto_pwhash_scryptsalsa208sha256((unsigned char*)k, klen,
@@ -591,7 +592,7 @@ real_crypto_pwhash_scrypt_str(p, salt, opslimit, memlimit)
     unsigned long memlimit
 
     CODE:
-        sodium_init();
+        assert(sodium_init() >= 0);
         unsigned char *hp = sodium_malloc(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
 
         int status = crypto_pwhash_scryptsalsa208sha256_str((unsigned char*)hp, (unsigned char*)p, 
