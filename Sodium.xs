@@ -209,6 +209,20 @@ crypto_generichash_KEYBYTES_MAX()
     RETVAL
 
 SV *
+crypto_scalarmult_SCALARBYTES()
+    CODE:
+    RETVAL = newSVuv((unsigned int) crypto_scalarmult_SCALARBYTES);
+    OUTPUT:
+    RETVAL
+
+SV *
+crypto_scalarmult_BYTES()
+    CODE:
+    RETVAL = newSVuv((unsigned int) crypto_scalarmult_BYTES);
+    OUTPUT:
+    RETVAL
+
+SV *
 randombytes_random()
     CODE:
         uint32_t r_bytes = randombytes_random();
@@ -225,6 +239,31 @@ randombytes_buf(size)
         unsigned char *buf[size];
         randombytes_buf(buf, size);
         RETVAL = newSVpv((const char * const)buf, size);
+    OUTPUT:
+        RETVAL
+
+SV *
+real_crypto_scalarmult_base(n)
+    unsigned char *n
+    
+    CODE:
+        unsigned char *q = sodium_malloc(crypto_scalarmult_BYTES);
+        assert(crypto_scalarmult_base(q, n) >= 0);
+        RETVAL = newSVpv((unsigned char *)q, crypto_scalarmult_BYTES);
+    
+    OUTPUT:
+        RETVAL
+
+SV *
+real_crypto_scalarmult(n, p)
+    unsigned char *n
+    unsigned char *p
+    
+    CODE:
+        unsigned char *q = sodium_malloc(crypto_scalarmult_BYTES);
+        assert(crypto_scalarmult(q, n, p) >= 0);
+        RETVAL = newSVpv((unsigned char *)q, crypto_scalarmult_BYTES);
+        
     OUTPUT:
         RETVAL
 

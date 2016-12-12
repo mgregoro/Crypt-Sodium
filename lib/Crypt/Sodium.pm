@@ -43,6 +43,9 @@ our @EXPORT = qw(
     crypto_stream_nonce
     crypto_pwhash_salt
     crypto_pwhash_scrypt
+    crypto_scalarmult_base
+    crypto_scalarmult
+    crypto_scalarmult_safe
 
     randombytes_buf
     randombytes_random
@@ -72,6 +75,8 @@ our @EXPORT = qw(
     crypto_generichash_BYTES
     crypto_generichash_BYTES_MIN
     crypto_generichash_BYTES_MAX
+    crypto_scalarmult_SCALARBYTES
+    crypto_scalarmult_BYTES
 );
 
 use subs qw/
@@ -98,6 +103,8 @@ use subs qw/
     crypto_generichash_BYTES
     crypto_generichash_BYTES_MIN
     crypto_generichash_BYTES_MAX
+    crypto_scalarmult_SCALARBYTES
+    crypto_scalarmult_BYTES
 /;
 
 require XSLoader;
@@ -113,6 +120,35 @@ sub crypto_stream_key {
 
 sub crypto_stream_nonce {
     return randombytes_buf(crypto_stream_NONCEBYTES);
+}
+
+sub crypto_scalarmult_base {
+    my ($n) = @_;
+    unless (length($n) == crypto_scalarmult_SCALARBYTES) {
+        die "[fatal]: secret key must be exactly " . crypto_scalarmult_SCALARBYTES . " bytes long\n";
+    }
+    
+    return real_crypto_scalarmult_base($n);
+}
+
+sub crypto_scalarmult {
+    my ($n, $p) = @_;
+
+    unless (length($n) == crypto_scalarmult_SCALARBYTES) {
+        die "[fatal]: secret key must be exactly " . crypto_scalarmult_SCALARBYTES . " bytes long\n";
+    }
+    
+    unless (length($p) == crypto_scalarmult_BYTES) {
+        die "[fatal]: public key must be exactly " . crypto_scalarmult_BYTES . " bytes long\n";
+    }
+    
+    return real_crypto_scalarmult($n, $p);
+}
+
+sub crypto_scalarmult_safe {
+    my ($n, $p, $p2) = @_;
+    
+    return crypto_hash(crypto_scalarmult($n, $p) ^ $p2 ^ $p);
 }
 
 sub crypto_stream {
@@ -430,20 +466,36 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
 =item crypto_pwhash_scrypt($password, $salt, $keylen, $opslimit, $memlimit)
    
    Usage: my $derivedkey = crypto_pwhash_scrypt($password, $salt, $keylen, $opslimit, $memlimit);
-   Note: $salt must be crypto_pwhash_SALTBYTES long, use crypto_pwhash_salt() to generate
-         $keylen maybe omitted, the default is crypto_box_SEEDBYTES
-         $opslimit maybe omitted, the default is crypto_pwhash_OPSLIMIT
-         $memlimit maybe omitted, the default is crypto_pwhash_MEMLIMIT
-         See L<http://doc.libsodium.org/password_hashing/README.html> for details>.
+   
+   Note:  $salt must be crypto_pwhash_SALTBYTES long, use crypto_pwhash_salt() to generate
+          $keylen maybe omitted, the default is crypto_box_SEEDBYTES
+          $opslimit maybe omitted, the default is crypto_pwhash_OPSLIMIT
+          $memlimit maybe omitted, the default is crypto_pwhash_MEMLIMIT
+          See L<http://doc.libsodium.org/password_hashing/README.html> for details>.
 
 =item crypto_pwhash_scrypt_str($password, $salt, $opslimit, $memlimit)
    
    Usage: my $hash_string = crypto_pwhash_scrypt_str($password, $salt);
-   Note: like the crypto_pwhash_scrypt function, this function can also take an opslimit and memlimit
-         value.  The default opslimit is exported into your namespace as crypto_pwhash_OPSLIMIT and the
-         default memlimit is exported as crypto_pwhash_MEMLIMIT, if you have a really important password
-         to hash and don't mind using 1GB of ram and 10s+ of CPU time on an i7-class CPU, you can use 
-         crypto_pwhash_OPSLIMIT_SENSITIVE and crypto_pwhash_MEMLIMIT_SENSITIVE instead.
+   
+   Note:  like the crypto_pwhash_scrypt function, this function can also take an opslimit and memlimit
+          value.  The default opslimit is exported into your namespace as crypto_pwhash_OPSLIMIT and the
+          default memlimit is exported as crypto_pwhash_MEMLIMIT, if you have a really important password
+          to hash and don't mind using 1GB of ram and 10s+ of CPU time on an i7-class CPU, you can use 
+          crypto_pwhash_OPSLIMIT_SENSITIVE and crypto_pwhash_MEMLIMIT_SENSITIVE instead.
+
+=item crypto_scalarmult_base()
+   
+   Usage: my $pk = crypto_scalarmult_base($sk);
+
+=item crypto_scalarmult()
+   
+   Usage: my $shared_secret = crypto_scalarmult($alice_secret, $bob_public);
+   
+=item crypto_scalarmult_safe()
+
+   Usage: my $shared_secret = crypto_scalarmult_safe($alice_secret, $bob_public, $alice_public);
+   Note:  The shared secret generated is a hash of the output of crypto_scalarmult xor'd with the two public 
+          keys as outlined here L<https://download.libsodium.org/doc/advanced/scalar_multiplication.html>.
 
 =back
 

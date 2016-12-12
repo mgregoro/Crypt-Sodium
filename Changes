@@ -26,8 +26,13 @@ Revision history for Perl extension Crypt::Sodium.
       in the XS code.  Thank you, Rob!
       
 0.09  Mon Dec 12 12:06:20 2016
-   - fixing RT #118956 by applying NEWELLC's patch.  many
-     thanks!  also added assert()'s around sodium_init() 
-     calls to silence clang's warnings about unused return
-     values
-
+    - fixing RT #118956 by applying NEWELLC's patch.  many
+      thanks for the patches and the follow up, Colin! 
+    - added support for crypto_scalarmult and a convenience 
+      function crypto_scalarmult_safe (misnamed?) that allows
+      for creating shared secrets between sets of keys GitHub 
+      ticket #3; thanks for the request @petschge!
+    - added support for crypto_scalarmult_base which allows 
+      calculation of a public key from a secret key
+    - added assert()'s around sodium_init() calls to silence 
+      clang's warnings about unused return values

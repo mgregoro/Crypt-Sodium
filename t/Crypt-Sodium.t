@@ -59,5 +59,11 @@ is(crypto_sign_open($signed, $spk), $cleartext, "verifying crypto_sign signed me
 my $sig = crypto_sign_detached($cleartext, $ssk);
 is(crypto_sign_verify_detached($sig, $cleartext, $spk), 1, "verifying crypto_sign_detached signature");
 
+# test scalarmult (key, shared secret derivation)
+ok(crypto_scalarmult_base($sk1) eq $pk1, "derive public key from private key using crypto_scalarmult_base");
+ok(crypto_scalarmult($sk1, $pk2) eq crypto_scalarmult($sk2, $pk1), "derive shared secret using crypto_scalarmult");
+ok(crypto_scalarmult_safe($sk1, $pk2, $pk1) eq crypto_scalarmult_safe($sk2, $pk1, $pk2), 
+    "derive shared secret using crypto_scalarmult_safe h(q || client_pub || server_pub)");
+
 done_testing();
 
