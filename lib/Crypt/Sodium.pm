@@ -410,7 +410,8 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
 =item crypto_box($message, $nonce, $public_key, $secret_key)
    
    Usage: my $ciphertext = crypto_box($m, $n, $pk, $sk);
-   Note: $nonce must be at least crypto_box_NONCEBYTES long.
+   
+   Note:  $nonce must be at least crypto_box_NONCEBYTES long.
 
 =item crypto_box_open($ciphertext, $nonce, $public_key, $secret_key)
    
@@ -419,8 +420,9 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
 =item crypto_secretbox($message, $nonce, $key);
    
    Usage: my $ciphertext = crypto_secretbox($m, $n, $k);
-   Note: $nonce must be at least crypto_box_NONCEBYTES long,
-         $key must be at least crypto_box_SECRETKEYBYTES long.
+   
+   Note:  $nonce must be at least crypto_box_NONCEBYTES long,
+          $key must be at least crypto_box_SECRETKEYBYTES long.
 
 =item crypto_secretbox_open($ciphertext, $nonce, $key);
    
@@ -433,15 +435,17 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
 =item crypto_stream($length, $nonce, $key)
    
    Usage: my $stream = crypto_stream($length, $nonce, $key);
-   Note: $nonce must be at least crypto_stream_NONCEBYTES long, 
-         $key must be at least crypto_stream_KEYBYTES long.
+   
+   Note:  $nonce must be at least crypto_stream_NONCEBYTES long, 
+          $key must be at least crypto_stream_KEYBYTES long.
 
 =item crypto_stream_xor($message, $nonce, $key)
    
    Usage: my $ciphertext = crypto_stream_xor($message, $nonce, $key);
           my $cleartext = crypto_stream_xor($ciphertext, $nonce, $key);
-   Note: $nonce must be at least crypto_stream_NONCEBYTES long, 
-         $key must be at least crypto_stream_KEYBYTES long.
+          
+   Note:  $nonce must be at least crypto_stream_NONCEBYTES long, 
+          $key must be at least crypto_stream_KEYBYTES long.
 
 =item randombytes_buf($length)
    
@@ -494,6 +498,7 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
 =item crypto_scalarmult_safe()
 
    Usage: my $shared_secret = crypto_scalarmult_safe($alice_secret, $bob_public, $alice_public);
+   
    Note:  The shared secret generated is a hash of the output of crypto_scalarmult xor'd with the two public 
           keys as outlined here L<https://download.libsodium.org/doc/advanced/scalar_multiplication.html>.
 
