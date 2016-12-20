@@ -36,3 +36,10 @@ Revision history for Perl extension Crypt::Sodium.
       calculation of a public key from a secret key
     - added assert()'s around sodium_init() calls to silence 
       clang's warnings about unused return values
+      
+0.10  Tue Dec 20 12:03:29 2016
+    - accepted and merged PR #4 from @colinnewell that 
+      substitutes all occurrences of newSVpv with newSVpvn
+      to improve the handling of empty string values across
+      the board
+      
