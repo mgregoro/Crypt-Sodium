@@ -37,9 +37,12 @@ Revision history for Perl extension Crypt::Sodium.
     - added assert()'s around sodium_init() calls to silence 
       clang's warnings about unused return values
       
-0.10  Tue Dec 20 12:03:29 2016
+0.10  Thu Dec 22 19:36:03 2016
     - accepted and merged PR #4 from @colinnewell that 
       substitutes all occurrences of newSVpv with newSVpvn
       to improve the handling of empty string values across
       the board
+    - got rid of assert.h and redundant sodium_init() calls, 
+      now call sodium_init() once in Sodium.pm's BEGIN {} 
+      block.
       

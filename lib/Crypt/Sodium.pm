@@ -4,7 +4,18 @@ use 5.008000;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION;
+BEGIN {
+    $VERSION = '0.10';
+    require XSLoader;
+    XSLoader::load('Crypt::Sodium', $VERSION);
+    
+    my $rv = real_sodium_init();
+    
+    if ($rv < 0) {
+        die "[fatal] error calling sodium_init() rv: $rv\n";
+    }
+}
 
 require Exporter;
 
@@ -107,8 +118,7 @@ use subs qw/
     crypto_scalarmult_BYTES
 /;
 
-require XSLoader;
-XSLoader::load('Crypt::Sodium', $VERSION);
+
 
 sub crypto_box_nonce {
     return randombytes_buf(crypto_box_NONCEBYTES);
