@@ -45,4 +45,6 @@ Revision history for Perl extension Crypt::Sodium.
     - got rid of assert.h and redundant sodium_init() calls, 
       now call sodium_init() once in Sodium.pm's BEGIN {} 
       block.
+    - tested that segfaults no longer occur fixed on armv7 
+      platforms
       
