@@ -47,4 +47,10 @@ Revision history for Perl extension Crypt::Sodium.
       block.
     - tested that segfaults no longer occur fixed on armv7 
       platforms
-      
+
+0.11  Thu Dec 22 20:18:42 2016
+    - updated crypto_generichash to use sodium_malloc()
+    - removed unused real_crypto_generichash_key XS routine
+    - added support for randombytes_uniform()
+    - added tests for crypto_generichash and company
+    - added tests for randombytes_random() and _uniform()

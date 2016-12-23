@@ -7,7 +7,6 @@
 #include "string.h"
 #include "sodium.h"
 
-
 MODULE = Crypt::Sodium      PACKAGE = Crypt::Sodium     
 
 PROTOTYPES: ENABLE
@@ -232,7 +231,18 @@ SV *
 randombytes_random()
     CODE:
         uint32_t r_bytes = randombytes_random();
-        RETVAL = newSVuv((unsigned int) r_bytes);
+        RETVAL = newSVuv((int) r_bytes);
+
+    OUTPUT:
+        RETVAL
+
+SV *
+randombytes_uniform(upper_bound)
+    unsigned int upper_bound
+
+    CODE:
+        uint32_t r_bytes = randombytes_uniform(upper_bound);
+        RETVAL = newSVuv((int) r_bytes);
 
     OUTPUT:
         RETVAL
@@ -242,7 +252,7 @@ randombytes_buf(size)
     unsigned long size
 
     CODE:
-        unsigned char *buf[size];
+        unsigned char *buf = sodium_malloc(size);
         randombytes_buf(buf, size);
         RETVAL = newSVpvn((const char * const)buf, size);
     OUTPUT:
@@ -431,50 +441,25 @@ real_crypto_generichash(in, inlen, outlen, key, keylen)
     size_t keylen
 
     CODE:
-    unsigned char out[crypto_generichash_BYTES_MAX];
-    
-    /* always declare failure */
-    int result = -1;
+        unsigned char *out = sodium_malloc(crypto_generichash_BYTES_MAX);
 
-    if (keylen == 0) {
-        result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, NULL, 0);
-    } else {
-        result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
-    }
+        /* always declare failure */
+        int result = -1;
 
-    if (result == 0) {
-        RETVAL = newSVpvn(out, outlen);
-    } else {
-        RETVAL = &PL_sv_undef;
-    }
+        if (keylen == 0) {
+            result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, NULL, 0);
+        } else {
+            result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
+        }
 
-    OUTPUT:
-    RETVAL
-
-SV *
-real_crypto_generichash_key(in, inlen, outlen, key, keylen)
-    unsigned char * in
-    unsigned long inlen
-    size_t outlen
-    unsigned char * key
-    size_t keylen
-
-    CODE:
-    unsigned char out[crypto_generichash_BYTES_MAX];
-    
-    /* always declare failure */
-    int result = -1;
-
-    result = crypto_generichash(out, outlen, in, (unsigned long long)inlen, key, keylen);
-
-    if (result == 0) {
-        RETVAL = newSVuv(1);
-    } else {
-        RETVAL = &PL_sv_undef;
-    }
+        if (result == 0) {
+            RETVAL = newSVpvn(out, outlen);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
 
     OUTPUT:
-    RETVAL
+        RETVAL
 
 AV *
 crypto_box_keypair()
@@ -667,5 +652,3 @@ real_crypto_pwhash_scrypt_str_verify(hp, p)
 
     OUTPUT:
         RETVAL
-
-

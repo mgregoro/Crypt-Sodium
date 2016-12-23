@@ -38,7 +38,10 @@ $enciphered = crypto_box($message, $n, $pk2, $sk1);
 is(crypto_box_open($enciphered, $n, $pk1, $sk2), $message, "Testing roundtrip of crypto_box");
 is(crypto_box_open(crypto_box('', $n, $pk2, $sk1), $n, $pk1, $sk2), '', "Testing roundtrip of ''");
 is(crypto_hash($message), crypto_hash($message), "Testing hash comparison");
-is(length(randombytes_buf(24)), 24, "Testing random bytes output");
+is(length(randombytes_buf(24)), 24, "Testing randombytes_buf() output length");
+ok(randombytes_random() > 0, "Testing randombytes_random() outputs a number greater than zero");
+my $rbu = randombytes_uniform(255);
+ok($rbu > 0 && $rbu < 255, "Testing randombytes_uniform() outputs an number within bounds");
 
 # test password hashing functionality
 my $cleartext = "abc123";
@@ -54,6 +57,38 @@ my ($spk, $ssk) = sign_keypair();
 # test sigs
 my $signed = crypto_sign($cleartext, $ssk);
 is(crypto_sign_open($signed, $spk), $cleartext, "verifying crypto_sign signed message");
+
+# tests for crypto_generichash
+my $hashed40 = crypto_generichash("Everybody Loves Chocolate", 40);
+is(length($hashed40), 40, "crypto_generichash returns the right length hash");
+is($hashed40, crypto_generichash("Everybody Loves Chocolate", 40), "crypto_generichash hashes match");
+isnt($hashed40, crypto_generichash("Everybody Hates Chocolate", 40), "crypto_generichash hashes with different inputs don't match");
+
+my $khashed32 = crypto_generichash_key("Everybody Hates Chocolate", 32, "ThisIsAFantasticHashKeyIsntIt");
+is(length($khashed32), 32, "crypto_generichash_key returns the right length hash");
+ok(
+    $khashed32 eq crypto_generichash_key(
+        "Everybody Hates Chocolate",
+        32,
+        "ThisIsAFantasticHashKeyIsntIt"
+    ), "crypto_generichash_key hashes match"
+);
+
+ok(
+    $khashed32 ne crypto_generichash_key(
+        "Everybody Hates Chocolate",
+        32,
+        "ThisIsntAFantasticHashKeyIsIt"
+    ), "crypto_generichash_key mismatch with a different key"
+);
+
+ok(
+    $khashed32 ne crypto_generichash_key(
+        "Everybody Loves Chocolate",
+        32,
+        "ThisIsAFantasticHashKeyIsntIt"
+    ), "crypto_generichash_key mismatch with a different input"
+);
 
 # test detached sigs
 my $sig = crypto_sign_detached($cleartext, $ssk);

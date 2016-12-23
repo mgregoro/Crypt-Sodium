@@ -6,7 +6,7 @@ use warnings;
 
 our $VERSION;
 BEGIN {
-    $VERSION = '0.10';
+    $VERSION = '0.11';
     require XSLoader;
     XSLoader::load('Crypt::Sodium', $VERSION);
     
@@ -60,6 +60,7 @@ our @EXPORT = qw(
 
     randombytes_buf
     randombytes_random
+    randombytes_uniform
     box_keypair
     sign_keypair
 
@@ -202,7 +203,9 @@ sub crypto_generichash {
         die "[fatal]: key must be between " . crypto_generichash_BYTES_MIN . " and " . crypto_generichash_BYTES_MAX . " bytes long.\n";
     }
 
-    return real_crypto_generichash($to_hash, length($to_hash), $outlen, 0, 0);
+    no warnings 'uninitialized';
+
+    return real_crypto_generichash($to_hash, length($to_hash), $outlen, undef, 0);
 }
 
 sub crypto_generichash_key {
