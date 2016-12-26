@@ -43,6 +43,10 @@ our @EXPORT = qw(
     crypto_hash
     crypto_generichash
     crypto_generichash_key
+    crypto_generichash_init
+    crypto_generichash_update
+    crypto_generichash_final
+    crypto_generichash_statebytes
     crypto_stream
     crypto_stream_xor
     crypto_box_keypair
@@ -119,7 +123,7 @@ use subs qw/
     crypto_scalarmult_BYTES
 /;
 
-
+use Crypt::Sodium::GenericHash::State;
 
 sub crypto_box_nonce {
     return randombytes_buf(crypto_box_NONCEBYTES);
@@ -222,6 +226,36 @@ sub crypto_generichash_key {
     }
 
     return real_crypto_generichash($to_hash, length($to_hash), $outlen, $key, length($key));
+}
+
+sub crypto_generichash_init {
+    my ($key, $hash_size) = @_;
+
+    if ($key) {
+        unless ((length($key) >= crypto_generichash_KEYBYTES_MIN) &&
+            (length($key) <= crypto_generichash_KEYBYTES_MAX)) {
+            die "[fatal]: key must be undef or between " . crypto_generichash_KEYBYTES_MIN . " and " . crypto_generichash_KEYBYTES_MAX . " bytes long.\n";
+        }
+    }
+
+    $hash_size = 64 unless $hash_size;
+
+    no warnings 'uninitialized';
+
+    return Crypt::Sodium::GenericHash::State->new(
+        state => real_crypto_generichash_init($key, length($key), $hash_size),
+        outlen => $hash_size,
+    );
+}
+
+sub crypto_generichash_update {
+    my ($state, $to_append) = @_;
+    real_crypto_generichash_update($state->{state}, $to_append, length($to_append));
+}
+
+sub crypto_generichash_final {
+    my ($state) = @_;
+    return real_crypto_generichash_final($state->{state}, $state->{outlen});
 }
 
 sub box_keypair {

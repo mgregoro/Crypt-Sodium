@@ -207,6 +207,13 @@ crypto_generichash_KEYBYTES_MAX()
         RETVAL
 
 SV *
+crypto_generichash_statebytes()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_generichash_statebytes());
+    OUTPUT:
+        RETVAL
+
+SV *
 crypto_scalarmult_SCALARBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_scalarmult_SCALARBYTES);
@@ -216,7 +223,7 @@ crypto_scalarmult_SCALARBYTES()
 SV *
 crypto_scalarmult_BYTES()
     CODE:
-    RETVAL = newSVuv((unsigned int) crypto_scalarmult_BYTES);
+        RETVAL = newSVuv((unsigned int) crypto_scalarmult_BYTES);
     OUTPUT:
         RETVAL
 
@@ -255,6 +262,7 @@ randombytes_buf(size)
         unsigned char *buf = sodium_malloc(size);
         randombytes_buf(buf, size);
         RETVAL = newSVpvn((const char * const)buf, size);
+        sodium_free(buf);
     OUTPUT:
         RETVAL
 
@@ -269,6 +277,7 @@ real_crypto_scalarmult_base(n)
         } else {
             RETVAL = &PL_sv_undef;
         }
+        sodium_free(q);
     OUTPUT:
         RETVAL
 
@@ -284,6 +293,7 @@ real_crypto_scalarmult(n, p)
         } else {
             RETVAL = &PL_sv_undef;
         }
+        sodium_free(q);
     OUTPUT:
         RETVAL
 
@@ -457,6 +467,57 @@ real_crypto_generichash(in, inlen, outlen, key, keylen)
         } else {
             RETVAL = &PL_sv_undef;
         }
+
+        sodium_free(out);
+
+    OUTPUT:
+        RETVAL
+
+TYPEMAP: <<EOT
+crypto_generichash_state * T_PTRREF
+EOT
+
+crypto_generichash_state *
+real_crypto_generichash_init(key, keylen, outlen)
+    unsigned char *key
+    size_t keylen
+    size_t outlen
+
+    CODE:
+        crypto_generichash_state *state = sodium_malloc(crypto_generichash_statebytes());
+
+        if (crypto_generichash_init(state, key, keylen, outlen) == 0) {
+            RETVAL = state;
+        } else {
+            sodium_free(state);
+            RETVAL = NULL;
+        }
+
+    OUTPUT:
+        RETVAL
+
+NO_OUTPUT int
+real_crypto_generichash_update(state, in, inlen)
+    crypto_generichash_state *state
+    unsigned char *in
+    size_t inlen
+
+    CODE:
+        crypto_generichash_update(state, in, inlen);
+
+SV *
+real_crypto_generichash_final(state, outlen)
+    crypto_generichash_state *state
+    size_t outlen
+
+    CODE:
+        unsigned char *out = sodium_malloc(outlen);
+        if (crypto_generichash_final(state, out, outlen) == 0) {
+            RETVAL = newSVpvn(out, outlen);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+        sodium_free(state);
 
     OUTPUT:
         RETVAL

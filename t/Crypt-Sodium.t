@@ -100,5 +100,53 @@ ok(crypto_scalarmult($sk1, $pk2) eq crypto_scalarmult($sk2, $pk1), "derive share
 ok(crypto_scalarmult_safe($sk1, $pk2, $pk1) eq crypto_scalarmult_safe($sk2, $pk1, $pk2), 
     "derive shared secret using crypto_scalarmult_safe h(q || client_pub || server_pub)");
 
+# crypto_generichash_init, update, and final... (hash append)
+my $state = crypto_generichash_init("TheGreatestHashkeyEver");
+
+is(ref($state), "Crypt::Sodium::GenericHash::State", "crypto_generichash_init() returns a ::GenericHash::State object");
+is($state->{outlen}, 64, "default outlen of 64 automagically selected");
+
+crypto_generichash_update($state, "Ever");
+crypto_generichash_update($state, "ybody ");
+crypto_generichash_update($state, "Loves Cocolate");
+
+my $ikhashed64 = crypto_generichash_final($state);
+is(length($ikhashed64), 64, "crypto_generichash_final output correct hash length");
+
+my $state2 = crypto_generichash_init("TheGreatestHashkeyEver");
+crypto_generichash_update($state2, "Everybody ");
+crypto_generichash_update($state2, "Loves Cocolate");
+my $ikhashed64_2 = crypto_generichash_final($state2);
+is($ikhashed64, $ikhashed64_2, "multi-part hashes with the same inputs and keys are identical");
+
+$state = crypto_generichash_init();
+$state2 = crypto_generichash_init();
+
+crypto_generichash_update($state, "Everybody Hates Chocolate");
+crypto_generichash_update($state2, "Everybody Hates Chocolate");
+
+$ikhashed64 = crypto_generichash_final($state);
+$ikhashed64_2 = crypto_generichash_final($state2);
+
+is($ikhashed64, $ikhashed64_2, "multi-part hashes with the same inputs and no keys are identical");
+
+$state = crypto_generichash_init(undef, 32);
+is($state->{outlen}, 32, "specifying alternate hash length works properly with undefined keys");
+
+$state2 = crypto_generichash_init(undef, 32);
+
+crypto_generichash_update($state, "Everybody Hates Chocolate");
+crypto_generichash_update($state2, "Everybody Loves Chocolate");
+
+$ikhashed64 = crypto_generichash_final($state);
+$ikhashed64_2 = crypto_generichash_final($state2);
+
+isnt($ikhashed64, $ikhashed64_2, "multi-part hashes with different inputs and no keys are different");
+
+is($ikhashed64, crypto_generichash(
+    "Everybody Hates Chocolate",
+    32,
+), "output of crypto_generichash_final with multiple update() calls same as crypto_generichash with same inputs");
+
 done_testing();
 
