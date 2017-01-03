@@ -56,3 +56,6 @@ Revision history for Perl extension Crypt::Sodium.
     - added tests for randombytes_random() and _uniform()
     - added crypto_generichash_init(), _update(), and final()
       to support multi-part hashing
+0.12  Tue Jan  3 15:04:46 2017
+    - added documentation for crypto_generichash() and company
+    

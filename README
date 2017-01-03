@@ -1,4 +1,4 @@
-Crypt-Sodium version 0.11
+Crypt-Sodium version 0.12
 =========================
 
 Simple wrapper around NaCL functions as provided by libsodium.  crypto_box, crypto_stream, crypto_hash,
@@ -23,7 +23,7 @@ This module requires these other modules and libraries:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2016 by Michael Gregorowicz
+Copyright (C) 2017 by Michael Gregorowicz
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.0 or,

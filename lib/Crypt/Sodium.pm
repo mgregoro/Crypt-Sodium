@@ -6,7 +6,7 @@ use warnings;
 
 our $VERSION;
 BEGIN {
-    $VERSION = '0.11';
+    $VERSION = '0.12';
     require XSLoader;
     XSLoader::load('Crypt::Sodium', $VERSION);
     
@@ -631,7 +631,7 @@ Michael Gregorowicz, E<lt>mike@mg2.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 Michael Gregorowicz
+Copyright (C) 2015-2017 Michael Gregorowicz
 
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.18 or, at your option, any later version of Perl 5 you may have available.
 
