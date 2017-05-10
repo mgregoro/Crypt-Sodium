@@ -117,7 +117,7 @@ crypto_sign_SECRETKEYBYTES()
         RETVAL
 
 SV *
-crypto_pwhash_SALTBYTES()
+crypto_pwhash_scryptsalsa208sha256_SALTBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_SALTBYTES);
 
@@ -125,7 +125,7 @@ crypto_pwhash_SALTBYTES()
         RETVAL      
 
 SV *
-crypto_pwhash_OPSLIMIT()
+crypto_pwhash_scryptsalsa208sha256_OPSLIMIT()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
 
@@ -133,7 +133,7 @@ crypto_pwhash_OPSLIMIT()
         RETVAL      
 
 SV *
-crypto_pwhash_OPSLIMIT_SENSITIVE()
+crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
 
@@ -141,7 +141,7 @@ crypto_pwhash_OPSLIMIT_SENSITIVE()
         RETVAL
 
 SV *
-crypto_pwhash_MEMLIMIT()
+crypto_pwhash_scryptsalsa208sha256_MEMLIMIT()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
 
@@ -149,7 +149,7 @@ crypto_pwhash_MEMLIMIT()
         RETVAL    
 
 SV *
-crypto_pwhash_MEMLIMIT_SENSITIVE()
+crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
 
@@ -157,12 +157,68 @@ crypto_pwhash_MEMLIMIT_SENSITIVE()
         RETVAL    
 
 SV *
-crypto_pwhash_STRBYTES()
+crypto_pwhash_scryptsalsa208sha256_STRBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_pwhash_scryptsalsa208sha256_STRBYTES);
 
     OUTPUT:
-        RETVAL    
+        RETVAL
+   
+SV *
+crypto_pwhash_SALTBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_SALTBYTES);
+
+    OUTPUT:
+        RETVAL 
+
+SV *
+crypto_pwhash_OPSLIMIT_INTERACTIVE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_OPSLIMIT_INTERACTIVE);
+
+    OUTPUT:
+        RETVAL   
+
+SV *
+crypto_pwhash_OPSLIMIT_MODERATE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_OPSLIMIT_MODERATE);
+
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_OPSLIMIT_SENSITIVE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_OPSLIMIT_SENSITIVE);
+
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_MEMLIMIT_INTERACTIVE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_MEMLIMIT_INTERACTIVE);
+
+    OUTPUT:
+        RETVAL   
+
+SV *
+crypto_pwhash_MEMLIMIT_MODERATE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_MEMLIMIT_MODERATE);
+
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_MEMLIMIT_SENSITIVE()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_MEMLIMIT_SENSITIVE);
+
+    OUTPUT:
+        RETVAL
 
 SV *
 crypto_generichash_BYTES()
@@ -224,6 +280,83 @@ SV *
 crypto_scalarmult_BYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_scalarmult_BYTES);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_PASSWD_MIN()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 0);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_PASSWD_MAX()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 4294967295);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_BYTES_MIN()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 16);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_BYTES_MAX()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 4294967295);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_STRBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 128);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_OPSLIMIT_MIN()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 3);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_OPSLIMIT_MAX()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 4294967295);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_MEMLIMIT_MIN()
+    CODE:
+        RETVAL = newSVuv((unsigned int) 8192);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_MEMLIMIT_MAX()
+    CODE:
+        RETVAL = newSVuv((unsigned int) (SIZE_MAX >= 4398046510080U) ? 4398046510080U : (SIZE_MAX >= 2147483648U) ? 2147483648U : 32768U);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_pwhash_ALG_DEFAULT()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_ALG_DEFAULT);
+    OUTPUT:
+        RETVAL
+    
+SV *
+crypto_pwhash_ALG_ARGON2I13()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_ALG_ARGON2I13);
     OUTPUT:
         RETVAL
 
@@ -644,6 +777,74 @@ real_crypto_sign_open(sm, smlen, pk)
         
         sodium_free(m);
 
+    OUTPUT:
+        RETVAL
+
+SV *
+real_crypto_pwhash(outlen, p, plen, salt, opslimit, memlimit, alg)
+    unsigned long outlen
+    unsigned char *p
+    unsigned long plen
+    unsigned char *salt
+    unsigned long opslimit
+    unsigned long memlimit
+    int alg
+    
+    CODE:
+        unsigned char *out = sodium_malloc(outlen);
+        
+        int status = crypto_pwhash((unsigned char *)out, outlen, (const unsigned char*)p, plen, 
+            (const unsigned char*)salt, opslimit, (size_t) memlimit, alg);
+        
+        if (status == 0) {
+            RETVAL = newSVpvn((unsigned char *)out, outlen);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+
+        sodium_free(out);
+        
+    OUTPUT:
+        RETVAL
+
+SV *
+real_crypto_pwhash_str(p, plen, opslimit, memlimit)
+    unsigned char *p
+    unsigned long plen
+    unsigned long opslimit
+    unsigned long memlimit
+    
+    CODE:
+    
+        char *out = sodium_malloc(crypto_pwhash_STRBYTES);
+        int status = crypto_pwhash_str((unsigned char *)out, (const unsigned char*)p, plen, opslimit, (size_t) memlimit);
+        
+        if (status == 0) {
+            RETVAL = newSVpvn((char *)out, crypto_pwhash_STRBYTES);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+
+        sodium_free(out);
+        
+    OUTPUT:
+        RETVAL     
+
+SV*
+real_crypto_pwhash_str_verify(hash, p, plen)
+    unsigned char *hash
+    unsigned char *p
+    unsigned long plen
+    
+    CODE:
+        int status = crypto_pwhash_str_verify((unsigned char *)hash, (const unsigned char*)p, plen);
+        
+        if (status == 0) {
+            RETVAL = newSVuv((unsigned int) 1);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+    
     OUTPUT:
         RETVAL
 

@@ -19,9 +19,9 @@ BEGIN {
 
 require Exporter;
 
-our @ISA = qw(Exporter);
+our @ISA = qw /Exporter/;
 
-our @EXPORT = qw(
+our @EXPORT = qw/
     real_crypto_stream_xor
     real_crypto_sign
     real_crypto_sign_open
@@ -57,10 +57,14 @@ our @EXPORT = qw(
     crypto_stream_key
     crypto_stream_nonce
     crypto_pwhash_salt
+    crypto_pwhash_scrypt_salt
     crypto_pwhash_scrypt
     crypto_scalarmult_base
     crypto_scalarmult
     crypto_scalarmult_safe
+    crypto_pwhash
+    crypto_pwhash_str
+    crypto_pwhash_str_verify
 
     randombytes_buf
     randombytes_random
@@ -81,10 +85,16 @@ our @EXPORT = qw(
     crypto_secretbox_MACBYTES
     crypto_secretbox_KEYBYTES
     crypto_secretbox_NONCEBYTES
-    crypto_pwhash_SALTBYTES
-    crypto_pwhash_OPSLIMIT
-    crypto_pwhash_MEMLIMIT
-    crypto_pwhash_STRBYTES
+    crypto_pwhash_scryptsalsa208sha256_SALTBYTES
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT
+    crypto_pwhash_scryptsalsa208sha256_STRBYTES
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MODERATE
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MODERATE
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE
     crypto_generichash_KEYBYTES
     crypto_generichash_KEYBYTES_MIN
     crypto_generichash_KEYBYTES_MAX
@@ -93,7 +103,24 @@ our @EXPORT = qw(
     crypto_generichash_BYTES_MAX
     crypto_scalarmult_SCALARBYTES
     crypto_scalarmult_BYTES
-);
+    crypto_pwhash_PASSWD_MIN
+    crypto_pwhash_BYTES_MIN
+    crypto_pwhash_BYTES_MAX
+    crypto_pwhash_SALTBYTES
+    crypto_pwhash_OPSLIMIT_MIN
+    crypto_pwhash_OPSLIMIT_MAX
+    crypto_pwhash_OPSLIMIT_INTERACTIVE
+    crypto_pwhash_OPSLIMIT_MODERATE
+    crypto_pwhash_OPSLIMIT_SENSITIVE
+    crypto_pwhash_MEMLIMIT_MIN
+    crypto_pwhash_MEMLIMIT_MAX
+    crypto_pwhash_MEMLIMIT_INTERACTIVE
+    crypto_pwhash_MEMLIMIT_MODERATE
+    crypto_pwhash_MEMLIMIT_SENSITIVE
+    crypto_pwhash_STRBYTES
+    crypto_pwhash_ALG_DEFAULT
+    crypto_pwhash_ALG_ARGON2I13
+/;
 
 use subs qw/
     crypto_stream_KEYBYTES
@@ -109,10 +136,16 @@ use subs qw/
     crypto_sign_PUBLICKEYBYTES
     crypto_sign_SECRETKEYBYTES
     crypto_sign_BYTES
-    crypto_pwhash_SALTBYTES
-    crypto_pwhash_OPSLIMIT
-    crypto_pwhash_MEMLIMIT
-    crypto_pwhash_STRBYTES
+    crypto_pwhash_scryptsalsa208sha256_SALTBYTES
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT
+    crypto_pwhash_scryptsalsa208sha256_STRBYTES
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MODERATE
+    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MODERATE
+    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE
     crypto_generichash_KEYBYTES
     crypto_generichash_KEYBYTES_MIN
     crypto_generichash_KEYBYTES_MAX
@@ -121,7 +154,26 @@ use subs qw/
     crypto_generichash_BYTES_MAX
     crypto_scalarmult_SCALARBYTES
     crypto_scalarmult_BYTES
+    crypto_pwhash_PASSWD_MIN
+    crypto_pwhash_BYTES_MIN
+    crypto_pwhash_BYTES_MAX
+    crypto_pwhash_SALTBYTES
+    crypto_pwhash_OPSLIMIT_MIN
+    crypto_pwhash_OPSLIMIT_MAX
+    crypto_pwhash_OPSLIMIT_INTERACTIVE
+    crypto_pwhash_OPSLIMIT_MODERATE
+    crypto_pwhash_OPSLIMIT_SENSITIVE
+    crypto_pwhash_MEMLIMIT_MIN
+    crypto_pwhash_MEMLIMIT_MAX
+    crypto_pwhash_MEMLIMIT_INTERACTIVE
+    crypto_pwhash_MEMLIMIT_MODERATE
+    crypto_pwhash_MEMLIMIT_SENSITIVE
+    crypto_pwhash_STRBYTES
+    crypto_pwhash_ALG_DEFAULT
+    crypto_pwhash_ALG_ARGON2I13
 /;
+
+
 
 use Crypt::Sodium::GenericHash::State;
 
@@ -368,6 +420,67 @@ sub crypto_pwhash_salt {
   return randombytes_buf(crypto_pwhash_SALTBYTES);
 }
 
+sub crypto_pwhash_scrypt_salt {
+  return randombytes_buf(crypto_pwhash_scryptsalsa208sha256_SALTBYTES);
+}
+
+sub crypto_pwhash {
+    my ($outlen, $password, $salt, $opslimit, $memlimit, $alg) = @_;
+
+    # default to right in the middle.
+    unless ($outlen >= crypto_pwhash_BYTES_MIN && $outlen <= crypto_pwhash_BYTES_MAX) {
+        $outlen = int(crypto_pwhash_BYTES_MAX / 2);
+    }
+
+    unless (length($salt) == crypto_pwhash_SALTBYTES) {
+        die "[fatal]: salt is not @{[crypto_pwhash_SALTBYTES]} bytes in length\n";
+    }
+    
+    $alg = crypto_pwhash_ALG_DEFAULT unless $alg;
+    
+    unless ($alg == crypto_pwhash_ALG_DEFAULT || $alg == crypto_pwhash_ALG_ARGON2I13) {
+        die "[fatal]: specified algorithm we do not know about\n";
+    }
+
+    if ($opslimit) {
+        unless ($opslimit > crypto_pwhash_OPSLIMIT_MIN && $opslimit < crypto_pwhash_OPSLIMIT_MAX) {
+            die "[fatal] opslimit out of bounds; must be between @{[crypto_pwhash_OPSLIMIT_MIN]} and @{[crypto_pwhash_OPSLIMIT_MAX]}\n";
+        }
+    } else {
+        $opslimit = crypto_pwhash_OPSLIMIT_INTERACTIVE;
+    }
+
+    if ($memlimit) {
+        unless ($memlimit > crypto_pwhash_MEMLIMIT_MIN && $memlimit < crypto_pwhash_MEMLIMIT_MAX) {
+            die "[fatal] memlimit out of bounds; must be between @{[crypto_pwhash_MEMLIMIT_MIN]} and @{[crypto_pwhash_MEMLIMIT_MAX]}\n";
+        }
+    } else {
+        $memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE;
+    }
+
+    my $output = real_crypto_pwhash($outlen, $password, length($password), $salt, $opslimit, $memlimit, $alg);
+}
+
+sub crypto_pwhash_str {
+    my ($pass, $opslimit, $memlimit) = @_;
+
+    unless ($opslimit > crypto_pwhash_OPSLIMIT_MIN && $opslimit < crypto_pwhash_OPSLIMIT_MAX) {
+        $opslimit = crypto_pwhash_OPSLIMIT_INTERACTIVE;
+    }      
+
+    unless ($memlimit > crypto_pwhash_MEMLIMIT_MIN && $memlimit < crypto_pwhash_MEMLIMIT_MAX) {
+        $memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE;
+    }
+
+    
+    return real_crypto_pwhash_str($pass, length($pass), $opslimit, $memlimit);
+}
+
+sub crypto_pwhash_str_verify {
+    my ($hash, $pass) = @_;
+    return real_crypto_pwhash_str_verify($hash, $pass, length($pass));
+}
+
 sub crypto_pwhash_scrypt {
     my ($pass, $salt, $klen, $ops, $mem) = @_;
 
@@ -375,13 +488,13 @@ sub crypto_pwhash_scrypt {
         die "[fatal]: supplying a zero length passphrase doesn't make any sense.\n";
     }
 
-    if (length($salt) != crypto_pwhash_SALTBYTES) {
-        die "[fatal]: salt must be exactly " . crypto_pwhash_SALTBYTES . " bytes long.\n";
+    if (length($salt) != crypto_pwhash_scryptsalsa208sha256_SALTBYTES) {
+        die "[fatal]: salt must be exactly " . crypto_pwhash_scryptsalsa208sha256_SALTBYTES . " bytes long.\n";
     }
 
     $klen = crypto_box_SEEDBYTES unless $klen;
-    $ops = crypto_pwhash_OPSLIMIT unless $ops;
-    $mem = crypto_pwhash_MEMLIMIT unless $mem;
+    $ops = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT unless $ops;
+    $mem = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT unless $mem;
 
     return real_crypto_pwhash_scrypt($klen, $pass, $salt, $ops, $mem);
 }
@@ -393,12 +506,12 @@ sub crypto_pwhash_scrypt_str {
         die "[fatal]: supplying a zero length passphrase doesn't make any sense.\n";
     }
 
-    if (length($salt) != crypto_pwhash_SALTBYTES) {
-        die "[fatal]: salt must be exactly " . crypto_pwhash_SALTBYTES . " bytes long.\n";
+    if (length($salt) != crypto_pwhash_scryptsalsa208sha256_SALTBYTES) {
+        die "[fatal]: salt must be exactly " . crypto_pwhash_scryptsalsa208sha256_SALTBYTES . " bytes long.\n";
     }
 
-    $ops = crypto_pwhash_OPSLIMIT unless $ops;
-    $mem = crypto_pwhash_MEMLIMIT unless $mem;
+    $ops = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT unless $ops;
+    $mem = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT unless $mem;
 
     return real_crypto_pwhash_scrypt_str($pass, $salt, $ops, $mem);
 }
@@ -578,7 +691,7 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
           value.  The default opslimit is exported into your namespace as crypto_pwhash_OPSLIMIT and the
           default memlimit is exported as crypto_pwhash_MEMLIMIT, if you have a really important password
           to hash and don't mind using 1GB of ram and 10s+ of CPU time on an i7-class CPU, you can use 
-          crypto_pwhash_OPSLIMIT_SENSITIVE and crypto_pwhash_MEMLIMIT_SENSITIVE instead.
+          crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE and crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE instead.
 
 =item crypto_scalarmult_base()
    

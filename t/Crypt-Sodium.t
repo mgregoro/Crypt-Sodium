@@ -45,7 +45,7 @@ ok($rbu > 0 && $rbu < 255, "Testing randombytes_uniform() outputs an number with
 
 # test password hashing functionality
 my $cleartext = "abc123";
-my $salt = crypto_pwhash_salt();
+my $salt = crypto_pwhash_scrypt_salt();
 my $key = crypto_pwhash_scrypt($cleartext, $salt);
 is($key, crypto_pwhash_scrypt($cleartext, $salt), "sanity check crypto_hash_scrypt");
 
@@ -147,6 +147,26 @@ is($ikhashed64, crypto_generichash(
     "Everybody Hates Chocolate",
     32,
 ), "output of crypto_generichash_final with multiple update() calls same as crypto_generichash with same inputs");
+
+my $pwh_salt = randombytes_buf(crypto_pwhash_SALTBYTES);
+my @bytes = 
+is(
+    crypto_pwhash(64, "I am the eggman", $pwh_salt), 
+    crypto_pwhash(64, "I am the eggman", $pwh_salt), 
+    "crypto_pwhash, same input parameters, same key"
+);
+
+isnt(
+    crypto_pwhash(64, "I am the eggman", $pwh_salt), 
+    crypto_pwhash(64, "I am not the eggman", randombytes_buf(crypto_pwhash_SALTBYTES)), 
+    "crypto_pwhash, different input parameters, different key"
+);
+
+# let's use some resources...
+my $ahashed = crypto_pwhash_str("Ultra Secret Fantastico", crypto_pwhash_OPSLIMIT_MODERATE, crypto_pwhash_MEMLIMIT_MODERATE);
+ok(length($ahashed) == crypto_pwhash_STRBYTES, "returned a string crypto_pwhash_STRBYTES in length");
+ok(crypto_pwhash_str_verify($ahashed, 'Ultra Secret Fantastico'), 'password verification succeeded, moderate-difficulty hash');
+ok(!crypto_pwhash_str_verify($ahashed, 'Ultra Secretish Fantastico'), 'password verification failed on bad password, moderate difficulty');
 
 done_testing();
 
