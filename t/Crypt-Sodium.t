@@ -158,7 +158,7 @@ is(
 
 isnt(
     crypto_pwhash(64, "I am the eggman", $pwh_salt), 
-    crypto_pwhash(64, "I am not the eggman", randombytes_buf(crypto_pwhash_SALTBYTES)), 
+    crypto_pwhash(64, "I am the walrus", randombytes_buf(crypto_pwhash_SALTBYTES)), 
     "crypto_pwhash, different input parameters, different key"
 );
 
