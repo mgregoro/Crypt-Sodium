@@ -168,5 +168,16 @@ ok(length($ahashed) == crypto_pwhash_STRBYTES, "returned a string crypto_pwhash_
 ok(crypto_pwhash_str_verify($ahashed, 'Ultra Secret Fantastico'), 'password verification succeeded, moderate-difficulty hash');
 ok(!crypto_pwhash_str_verify($ahashed, 'Ultra Secretish Fantastico'), 'password verification failed on bad password, moderate difficulty');
 
+# xchacha/poly1035
+ok(my $xchacha_key = crypto_aead_xchacha20poly1305_ietf_keygen());
+ok(length($xchacha_key) == crypto_aead_xchacha20poly1305_ietf_KEYBYTES, "returned a string crypto_aead_xchacha20poly1305_ietf_KEYBYTES in length");
+ok(my $xchacha_nonce = crypto_aead_xchacha20poly1305_ietf_nonce());
+ok(length($xchacha_nonce) == crypto_aead_xchacha20poly1305_ietf_NPUBBYTES, "returned a string crypto_aead_xchacha20poly1305_ietf_NPUBBYTES in length");
+ok(my $ciphered = crypto_aead_xchacha20poly1305_ietf_encrypt("1234", "additional data", $xchacha_nonce, $xchacha_key), "xchacha/poly1035 encryption succeeded");
+ok(crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "additional data", $xchacha_nonce, $xchacha_key) eq "1234", "xchacha/poly1035 decryption succeeded");
+ok(!crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "wrong data", $xchacha_nonce, $xchacha_key), "xchacha/poly1035 decryption failed with bad AD");
+ok(!crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "additional data", "Wrong Nonce", $xchacha_key), "xchacha/poly1035 decryption failed with bad nonce");
+ok(!crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "additional data", $xchacha_nonce, "Wrong key"), "xchacha/poly1035 decryption failed with bad key");
+
 done_testing();
 
