@@ -65,7 +65,10 @@ our @EXPORT = qw/
     crypto_pwhash
     crypto_pwhash_str
     crypto_pwhash_str_verify
-
+    crypto_aead_xchacha20poly1305_ietf_nonce
+    crypto_aead_xchacha20poly1305_ietf_keygen
+    crypto_aead_xchacha20poly1305_ietf_encrypt
+    crypto_aead_xchacha20poly1305_ietf_decrypt
     randombytes_buf
     randombytes_random
     randombytes_uniform
@@ -120,6 +123,8 @@ our @EXPORT = qw/
     crypto_pwhash_STRBYTES
     crypto_pwhash_ALG_DEFAULT
     crypto_pwhash_ALG_ARGON2I13
+    crypto_aead_xchacha20poly1305_ietf_KEYBYTES
+    crypto_aead_xchacha20poly1305_ietf_NPUBBYTES
 /;
 
 use subs qw/
@@ -171,6 +176,8 @@ use subs qw/
     crypto_pwhash_STRBYTES
     crypto_pwhash_ALG_DEFAULT
     crypto_pwhash_ALG_ARGON2I13
+    crypto_aead_xchacha20poly1305_ietf_KEYBYTES
+    crypto_aead_xchacha20poly1305_ietf_NPUBBYTES
 /;
 
 
@@ -522,6 +529,29 @@ sub crypto_pwhash_scrypt_str_verify {
     return real_crypto_pwhash_scrypt_str_verify($hashed_pass, $pass);
 }
 
+sub crypto_aead_xchacha20poly1305_ietf_nonce {
+
+  return randombytes_buf(crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+}
+
+sub crypto_aead_xchacha20poly1305_ietf_keygen {
+  my ($message, $ad, $nonce, $key) = @_;
+  
+  return real_crypto_aead_xchacha20poly1305_ietf_keygen();
+}
+
+sub crypto_aead_xchacha20poly1305_ietf_encrypt {
+  my ($message, $ad, $nonce, $key) = @_;
+  
+  return real_crypto_aead_xchacha20poly1305_ietf_encrypt($message, length($message), $ad, length($ad), $nonce, $key);
+}
+
+sub crypto_aead_xchacha20poly1305_ietf_decrypt {
+  my ($cipher, $ad, $nonce, $key) = @_;
+  
+  return real_crypto_aead_xchacha20poly1305_ietf_decrypt($cipher, length($cipher), $ad, length($ad), $nonce, $key);
+}
+
 # Preloaded methods go here.
 
 1;
@@ -708,6 +738,37 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
    Note:  The shared secret generated is a hash of the output of crypto_scalarmult xor'd with the two public 
           keys as outlined here L<https://download.libsodium.org/doc/advanced/scalar_multiplication.html>.
 
+=item crypto_aead_xchacha20poly1305_ietf_keygen()
+   
+   Usage: my $key = crypto_aead_xchacha20poly1305_ietf_keygen();
+
+   Note:  This helper function is equivalent to calling randombytes_buf(crypto_aead_xchacha20poly1305_KEYBYTES)
+          See L<https://download.libsodium.org/doc/secret-key_cryptography/xchacha20-poly1305_construction.html> for details>.
+
+=item crypto_aead_xchacha20poly1305_ietf_nonce()
+   
+   Usage: my $key = crypto_aead_xchacha20poly1305_ietf_nonce();
+
+   Note:  This helper function is equivalent to calling randombytes_buf(crypto_aead_xchacha20poly1305_NPUBBYTES)
+          See L<https://download.libsodium.org/doc/secret-key_cryptography/xchacha20-poly1305_construction.html> for details>.
+
+=item crypto_aead_xchacha20poly1305_ietf_encrypt($message, $ad, $nonce, $key)
+   
+   Usage: my $ciphered = crypto_aead_xchacha20poly1305_ietf_encrypt($message, $ad, $nonce, $key);
+
+   Example: my $k = crypto_aead_xchacha20poly1305_ietf_keygen();
+            my $n = crypto_aead_xchacha20poly1305_ietf_nonce(); 
+            my $ciphered = crypto_aead_xchacha20poly1305_ietf_encrypt("secret", "additional data", $n, $k);
+   
+   Note: See L<https://download.libsodium.org/doc/secret-key_cryptography/xchacha20-poly1305_construction.html> for details>.
+
+
+=item crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, $ad, $nonce, $key)
+   
+   Usage: my $ciphered = crypto_aead_xchacha20poly1305_ietf_encrypt($ciphered, $ad, $nonce, $key)
+
+   Note: See L<https://download.libsodium.org/doc/secret-key_cryptography/xchacha20-poly1305_construction.html> for details>.
+
 =back
 
 =head1 EXPORTED CONSTANTS
@@ -728,6 +789,8 @@ Crypt::Sodium - Perl bindings for libsodium (NaCL) https://github.com/jedisct1/l
  crypto_pwhash_OPSLIMIT
  crypto_pwhash_MEMLIMIT
  crypto_pwhash_STRBYTES
+ crypto_aead_xchacha20poly1305_KEYBYTES
+ crypto_aead_xchacha20poly1305_NPUBBYTES
 
 =head1 SEE ALSO
 

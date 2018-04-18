@@ -361,6 +361,22 @@ crypto_pwhash_ALG_ARGON2I13()
         RETVAL
 
 SV *
+crypto_aead_xchacha20poly1305_ietf_KEYBYTES()
+  CODE:
+    RETVAL = newSVuv((unsigned int) crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+
+  OUTPUT:
+    RETVAL
+
+SV *
+crypto_aead_xchacha20poly1305_ietf_NPUBBYTES()
+  CODE:
+    RETVAL = newSVuv((unsigned int) crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+
+  OUTPUT:
+		RETVAL
+
+SV *
 real_sodium_init()
     CODE:
         RETVAL = newSViv(sodium_init());
@@ -914,3 +930,77 @@ real_crypto_pwhash_scrypt_str_verify(hp, p)
 
     OUTPUT:
         RETVAL
+
+SV *
+real_crypto_aead_xchacha20poly1305_ietf_keygen()
+  CODE:
+		unsigned char key[crypto_aead_xchacha20poly1305_ietf_KEYBYTES];
+    crypto_aead_xchacha20poly1305_ietf_keygen(key);
+    RETVAL = newSVpvn((unsigned char *)key, sizeof(key));
+	OUTPUT:
+		RETVAL
+
+SV *
+real_crypto_aead_xchacha20poly1305_ietf_encrypt(m, mlen, ad, adlen, nsec, k)
+  unsigned char *m
+  unsigned long mlen
+  unsigned char *ad
+  unsigned long adlen
+  unsigned char *nsec
+  unsigned char *k
+
+  CODE:
+      unsigned char ciphertext[mlen + crypto_aead_xchacha20poly1305_ietf_ABYTES];
+      unsigned long long ciphertext_len;
+
+      int status = crypto_aead_xchacha20poly1305_ietf_encrypt(
+        ciphertext,
+        &ciphertext_len,
+        (const unsigned char*)m,
+        (unsigned long long) mlen,
+        (const unsigned char*)ad,
+        (unsigned long long) adlen,
+        NULL,
+        (unsigned char *)nsec,
+        (unsigned char *)k
+      );
+
+      if (status == 0) {
+          RETVAL = newSVpvn((unsigned char *)ciphertext, ciphertext_len);
+      } else {
+          RETVAL = &PL_sv_undef;
+      }
+  OUTPUT:
+      RETVAL
+
+SV *
+real_crypto_aead_xchacha20poly1305_ietf_decrypt(c, clen, ad, adlen, npub, k)
+  unsigned char *c
+  unsigned long clen
+  unsigned char *k
+  unsigned char *ad
+  unsigned long adlen
+  unsigned char *npub
+
+  CODE:
+      unsigned char m[clen - crypto_aead_xchacha20poly1305_ietf_ABYTES];
+      unsigned long long mlen;
+      int status = crypto_aead_xchacha20poly1305_ietf_decrypt(
+        m,
+        &mlen,
+        NULL,
+        (const unsigned char*)c,
+        (unsigned long long)clen,
+        (const unsigned char*)ad,
+        (unsigned long long) adlen,
+        (const unsigned char*)npub,
+        (const unsigned char*)k
+      );
+
+      if (status == 0) {
+          RETVAL = newSVpvn((unsigned char *)m, mlen);
+      } else {
+          RETVAL = &PL_sv_undef;
+      }
+  OUTPUT:
+      RETVAL
