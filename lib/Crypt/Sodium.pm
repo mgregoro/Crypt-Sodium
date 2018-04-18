@@ -530,7 +530,6 @@ sub crypto_pwhash_scrypt_str_verify {
 }
 
 sub crypto_aead_xchacha20poly1305_ietf_nonce {
-
   return randombytes_buf(crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
 }
 
@@ -807,8 +806,8 @@ Michael Gregorowicz, E<lt>mike@mg2.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015-2017 Michael Gregorowicz
+Copyright (C) 2015-2018 Michael Gregorowicz
 
-This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.18 or, at your option, any later version of Perl 5 you may have available.
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself, either Perl version 5.26 or, at your option, any later version of Perl 5 you may have available.
 
 =cut
