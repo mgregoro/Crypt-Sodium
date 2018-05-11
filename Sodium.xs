@@ -936,8 +936,9 @@ real_crypto_pwhash_scrypt_str_verify(hp, p)
 
 SV *
 real_crypto_aead_xchacha20poly1305_ietf_keygen()
-  CODE:
-        unsigned char k* = sodium_malloc(crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+
+    CODE:
+        unsigned char *k = sodium_malloc(crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
         crypto_aead_xchacha20poly1305_ietf_keygen(k);
         RETVAL = newSVpvn((unsigned char *)k, crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
         sodium_free(k);
