@@ -1,15 +1,43 @@
 #define PERL_NO_GET_CONTEXT
+#include "sodium.h"
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-
 #include "ppport.h"
 #include "string.h"
-#include "sodium.h"
+#include "stdio.h"
+
+const int have_maj_ver = P5CS_LIBMAJ;
+const int have_min_ver = P5CS_LIBMIN;
+const int have_rev_ver = P5CS_LIBREV;
+
+#ifdef P5CS_LIBVER
+char* vhave = P5CS_LIBVER;
+#else
+char* vhave = "1.0.8\0";
+#endif
+
+bool Crypt_Sodium_XS_sufficient_libsodium_version (int maj, int min, int rev) {
+    if (maj <= have_maj_ver && min <= have_min_ver && rev <= have_rev_ver) {
+        return true;
+    }
+    return false;
+}
+
+#define P5CS_VERERR "[fatal] Crypt::Sodium - libsodium function '%s' is not implemented until libsodium version %s; this module built against %s"
 
 MODULE = Crypt::Sodium      PACKAGE = Crypt::Sodium     
 
 PROTOTYPES: ENABLE
+
+SV *
+compile_time_libsodium_version()
+    CODE:
+        RETVAL = newSVpvn(vhave, strlen(vhave));
+    
+    OUTPUT:
+        RETVAL
 
 SV *
 crypto_stream_NONCEBYTES()
@@ -345,36 +373,6 @@ crypto_pwhash_MEMLIMIT_MAX()
         RETVAL = newSVuv((unsigned int) (SIZE_MAX >= 4398046510080U) ? 4398046510080U : (SIZE_MAX >= 2147483648U) ? 2147483648U : 32768U);
     OUTPUT:
         RETVAL
-        
-SV *
-crypto_pwhash_ALG_DEFAULT()
-    CODE:
-        RETVAL = newSVuv((unsigned int) crypto_pwhash_ALG_DEFAULT);
-    OUTPUT:
-        RETVAL
-    
-SV *
-crypto_pwhash_ALG_ARGON2I13()
-    CODE:
-        RETVAL = newSVuv((unsigned int) crypto_pwhash_ALG_ARGON2I13);
-    OUTPUT:
-        RETVAL
-
-SV *
-crypto_aead_xchacha20poly1305_ietf_KEYBYTES()
-  CODE:
-    RETVAL = newSVuv((unsigned int) crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
-
-  OUTPUT:
-    RETVAL
-
-SV *
-crypto_aead_xchacha20poly1305_ietf_NPUBBYTES()
-  CODE:
-    RETVAL = newSVuv((unsigned int) crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
-
-  OUTPUT:
-		RETVAL
 
 SV *
 real_sodium_init()
@@ -935,13 +933,62 @@ real_crypto_pwhash_scrypt_str_verify(hp, p)
         RETVAL
 
 SV *
+crypto_pwhash_ALG_DEFAULT()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_ALG_DEFAULT);
+            
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_pwhash_ALG_ARGON2I13()
+    CODE:
+        if (Crypt_Sodium_XS_sufficient_libsodium_version(1, 0, 9)) {   
+            RETVAL = newSVuv((unsigned int) crypto_pwhash_ALG_ARGON2I13);
+        } else {
+            croak(P5CS_VERERR, __func__, "1.0.9", vhave);
+        }
+        
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_aead_xchacha20poly1305_ietf_KEYBYTES()
+  CODE:
+        if (Crypt_Sodium_XS_sufficient_libsodium_version(1, 0, 12)) { 
+            RETVAL = newSVuv((unsigned int) crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+        } else {
+            croak(P5CS_VERERR, __func__, "1.0.12", vhave);
+        }
+
+  OUTPUT:
+    RETVAL
+
+SV *
+crypto_aead_xchacha20poly1305_ietf_NPUBBYTES()
+  CODE:
+        if (Crypt_Sodium_XS_sufficient_libsodium_version(1, 0, 12)) { 
+            RETVAL = newSVuv((unsigned int) crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+        } else {
+            croak(P5CS_VERERR, __func__, "1.0.12", vhave);
+        }
+
+  OUTPUT:
+        RETVAL
+
+SV *
 real_crypto_aead_xchacha20poly1305_ietf_keygen()
 
     CODE:
-        unsigned char *k = sodium_malloc(crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
-        crypto_aead_xchacha20poly1305_ietf_keygen(k);
-        RETVAL = newSVpvn((unsigned char *)k, crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
-        sodium_free(k);
+    
+        if (Crypt_Sodium_XS_sufficient_libsodium_version(1, 0, 12)) { 
+            unsigned char *k = sodium_malloc(crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+            crypto_aead_xchacha20poly1305_ietf_keygen(k);
+            RETVAL = newSVpvn((unsigned char *)k, crypto_aead_xchacha20poly1305_ietf_KEYBYTES);
+            sodium_free(k);
+        } else {
+            croak(P5CS_VERERR, __func__, "1.0.12", vhave);
+        }
 	
     OUTPUT:
 		RETVAL
@@ -956,28 +1003,32 @@ real_crypto_aead_xchacha20poly1305_ietf_encrypt(m, mlen, ad, adlen, nsec, k)
   unsigned char *k
 
   CODE:
-        unsigned char *c = sodium_malloc(mlen + crypto_aead_xchacha20poly1305_ietf_ABYTES);
-        unsigned long long clen;
+        if (Crypt_Sodium_XS_sufficient_libsodium_version(1, 0, 12)) { 
+            unsigned char *c = sodium_malloc(mlen + crypto_aead_xchacha20poly1305_ietf_ABYTES);
+            unsigned long long clen;
 
-        int status = crypto_aead_xchacha20poly1305_ietf_encrypt(
-            c,
-            &clen,
-            (const unsigned char*)m,
-            (unsigned long long) mlen,
-            (const unsigned char*)ad,
-            (unsigned long long) adlen,
-            NULL,
-            (unsigned char *)nsec,
-            (unsigned char *)k
-        );
+            int status = crypto_aead_xchacha20poly1305_ietf_encrypt(
+                c,
+                &clen,
+                (const unsigned char*)m,
+                (unsigned long long) mlen,
+                (const unsigned char*)ad,
+                (unsigned long long) adlen,
+                NULL,
+                (unsigned char *)nsec,
+                (unsigned char *)k
+            );
 
-        if (status == 0) {
-          RETVAL = newSVpvn((unsigned char *)c, clen);
+            if (status == 0) {
+              RETVAL = newSVpvn((unsigned char *)c, clen);
+            } else {
+              RETVAL = &PL_sv_undef;
+            }
+            
+            sodium_free(c);
         } else {
-          RETVAL = &PL_sv_undef;
+            croak(P5CS_VERERR, __func__, "1.0.12", vhave);
         }
-        
-        sodium_free(c);
         
   OUTPUT:
       RETVAL
@@ -992,27 +1043,30 @@ real_crypto_aead_xchacha20poly1305_ietf_decrypt(c, clen, ad, adlen, npub, k)
   unsigned char *npub
 
   CODE:
-        unsigned char *m = sodium_malloc(clen - crypto_aead_xchacha20poly1305_ietf_ABYTES);
-        unsigned long long mlen;
-        int status = crypto_aead_xchacha20poly1305_ietf_decrypt(
-            m,
-            &mlen,
-            NULL,
-            (const unsigned char*)c,
-            (unsigned long long)clen,
-            (const unsigned char*)ad,
-            (unsigned long long) adlen,
-            (const unsigned char*)npub,
-            (const unsigned char*)k
-        );
+        if (Crypt_Sodium_XS_sufficient_libsodium_version(1, 0, 12)) { 
+            unsigned char *m = sodium_malloc(clen - crypto_aead_xchacha20poly1305_ietf_ABYTES);
+            unsigned long long mlen;
+            int status = crypto_aead_xchacha20poly1305_ietf_decrypt(
+                m,
+                &mlen,
+                NULL,
+                (const unsigned char*)c,
+                (unsigned long long)clen,
+                (const unsigned char*)ad,
+                (unsigned long long) adlen,
+                (const unsigned char*)npub,
+                (const unsigned char*)k
+            );
 
-        if (status == 0) {
-          RETVAL = newSVpvn((unsigned char *)m, mlen);
+            if (status == 0) {
+              RETVAL = newSVpvn((unsigned char *)m, mlen);
+            } else {
+              RETVAL = &PL_sv_undef;
+            }
+            
+            sodium_free(m);
         } else {
-          RETVAL = &PL_sv_undef;
-        }
-        
-        sodium_free(m);
-        
+            croak(P5CS_VERERR, __func__, "1.0.12", vhave);
+        }  
   OUTPUT:
       RETVAL
