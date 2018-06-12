@@ -56,6 +56,21 @@ Revision history for Perl extension Crypt::Sodium.
     - added tests for randombytes_random() and _uniform()
     - added crypto_generichash_init(), _update(), and final()
       to support multi-part hashing
-0.12  Tue Jan  3 15:04:46 2017
+      
+0.12  Tue Jun  12 01:02:22 2018
     - added documentation for crypto_generichash() and company
+    - re https://github.com/mgregoro/Crypt-Sodium/issues/13 did
+      my best to make the build process a bit more robust, 
+      checking obvious places like /usr/local/include and
+      /usr/local/Cellar/libsodium/<version>/include, and trying
+      pkg-config and Alien::Sodium if available.
+    - merged pr #12 from @starbelly -- thx BP -- which exposes 
+      crypto_aead_xchacha20poly1305_ietf functions
+    - added Crypt::Sodium::BuildVersion which contains info 
+      about the version of libsodium this module was built
+      against.  this allows us to introduce breaking function-
+      ality without sacrificing backwards compatibility in the
+      future
+    - 
+      
     

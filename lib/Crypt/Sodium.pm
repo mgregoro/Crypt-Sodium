@@ -1,5 +1,6 @@
 package Crypt::Sodium;
 
+use Crypt::Sodium::BuildVersion;
 use 5.008000;
 use strict;
 use warnings;

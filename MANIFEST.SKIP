@@ -1,0 +1,45 @@
+#!start included /usr/share/perl/5.8/ExtUtils/MANIFEST.SKIP
+# Avoid version control files.
+\B\.git\b
+\B\.gitignore\b
+
+# Avoid VMS specific MakeMaker generated files
+\bDescrip.MMS$
+\bDESCRIP.MMS$
+\bdescrip.mms$
+
+# Avoid Makemaker generated and utility files.
+\bMANIFEST\.bak
+\bMakefile$
+\bblib/
+\bMakeMaker-\d
+\bpm_to_blib\.ts$
+\bpm_to_blib$
+\bblibdirs\.ts$         
+
+# Avoid temp and backup files.
+~$
+\.old$
+\#$
+\b\.#
+\.bak$
+\.tmp$
+\.#
+\.rej$
+
+# macOS Crap
+\B\.DS_Store
+\B\._
+
+# Avoid Devel::Cover and Devel::CoverX::Covered files.
+\bcover_db\b
+\bcovered\b
+ 
+# Avoid MYMETA files
+^MYMETA\.
+
+# Avoid configuration metadata file
+^MYMETA\.
+
+# Avoid archives of this distribution
+\bCrypt-Sodium-[\d\.\_]+

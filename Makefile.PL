@@ -1,6 +1,9 @@
 use 5.008000;
 use ExtUtils::MakeMaker;
 use List::Util qw/uniq/;
+use Cwd qw/abs_path/;
+use File::Basename qw/dirname/;
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
@@ -24,6 +27,10 @@ my %config = (
     INC               => '', # e.g., '-I. -I/usr/include/other'
     # Un-comment this if you add C files to link with later:
     # OBJECT            => '$(O_FILES)', # link all the C files too
+    clean             => {
+        # this file is created before building, and should be installed.. but cleaned when 'make clean' is run.
+        FILES => 'lib/Crypt/Sodium/BuildVersion.pm',
+    },
 );
 
 my $i = 0;
@@ -33,6 +40,7 @@ if (scalar(keys %$c) > 0) {
         $i = 4;
         my ($major, $minor, $revision) = split(/\./, $c->{modversion});
         $config{DEFINE} .= " -DP5CS_LIBMAJ=$major -DP5CS_LIBMIN=$minor -DP5CS_LIBREV=$revision -DP5CS_LIBVER=" . '\"' . $c->{modversion} . '\"';
+        write_ver_file($c->{modversion});
     }
     
     if ($c->{libdir}) {
@@ -49,13 +57,14 @@ if (scalar(keys %$c) > 0) {
     if (-d "/usr/local/Cellar/libsodium") {
         # just build against the newest homebrew libsodium this situation should work out to '3'. 
         $c->{modversion} = (sort {$b <=> $a} `ls /usr/local/Cellar/libsodium`)[0];
-        if (-f "/usr/local/Cellar/libsodium/$newest/include/sodium.h") {
+        if (-f "/usr/local/Cellar/libsodium/$c->{modversion}/include/sodium.h") {
             $i += 3;
-            $c->{libdir} = "-lsodium -L/usr/local/Cellar/libsodium/$newest/lib";            
-            $c->{includedir} = "/usr/local/Cellar/libsodium/$newest/include";
+            $c->{libdir} = "-lsodium -L/usr/local/Cellar/libsodium/$c->{modversion}t/lib";            
+            $c->{includedir} = "/usr/local/Cellar/libsodium/$c->{modversion}/include";
             my ($major, $minor, $revision) = split(/\./, $c->{modversion});
             # far fetched but..
             $config{DEFINE} .= " -DP5CS_LIBMAJ=$major -DP5CS_LIBMIN=$minor -DP5CS_LIBREV=$revision -DP5CS_LIBVER=" . '\"' . $c->{modversion} . '\"';
+            write_ver_file($c->{modversion});
         }
     } else { 
         # Alien::Sodium (as of Jun 11 2018) supplies 1.0.8 anyway, so if we find it, just make sure we have the 
@@ -67,6 +76,7 @@ if (scalar(keys %$c) > 0) {
             $c->{includedir} = join(' ', uniq(split/ /, Alien::Sodium->cflags));
         }
         
+        write_ver_file();
         $config{DEFINE} .= " -DP5CS_LIBMAJ=1 -DP5CS_LIBMIN=0 -DP5CS_LIBREV=8 -DP5CS_LIBVER=" . '\"1.0.8\"';
     }
 }
@@ -103,5 +113,23 @@ if ($i >= 3) {
         print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n";
     } else {
         print "If you're sure you have libsodium 1.0.8 or higher installed, please run 'make' and 'make test' to build Crypt::Sodium\n\n";
+    }
+}
+
+sub write_ver_file {
+    my ($lsv) = @_;
+    $lsv //= '1.0.8';
+    my ($major, $minor, $revision) = split(/\./, $lsv);
+    my $dist_path = dirname(abs_path(__FILE__));
+    if (-d "$dist_path/lib/Crypt/Sodium") {
+        # we're in the right place.
+        open my $fh, '>', "$dist_path/lib/Crypt/Sodium/BuildVersion.pm";
+        print $fh "package Crypt::Sodium::BuildVersion;\n";
+        print $fh 'our $VERSION = ' . "'v$lsv';\n";
+        print $fh 'our $MAJOR = ' . $major . ";\n";
+        print $fh 'our $MINOR = ' . $minor . ";\n";
+        print $fh 'our $REVISION = ' . $revision . ";\n";
+        print $fh "1;\n";
+        close $fh;
     }
 }

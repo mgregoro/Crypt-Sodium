@@ -1,12 +1,13 @@
 Changes
+lib/Crypt/Sodium.pm
+lib/Crypt/Sodium/GenericHash/State.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
+MANIFEST.SKIP
+META.json
+META.yml
 ppport.h
 README
 README.md
 Sodium.xs
 t/Crypt-Sodium.t
-lib/Crypt/Sodium.pm
-lib/Crypt/Sodium/GenericHash/State.pm
-META.yml                                 Module YAML meta-data (added by MakeMaker)
-META.json                                Module JSON meta-data (added by MakeMaker)
