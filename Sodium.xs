@@ -135,12 +135,25 @@ crypto_box_MACBYTES()
     OUTPUT:
         RETVAL
 
-
 SV *
 crypto_sign_SECRETKEYBYTES()
     CODE:
         RETVAL = newSVuv((unsigned int) crypto_sign_SECRETKEYBYTES);
 
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_sign_ed25519_PUBLICKEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_PUBLICKEYBYTES)
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_sign_ed25519_SECRETKEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_SECRETKEYBYTES)
     OUTPUT:
         RETVAL
 
@@ -311,66 +324,73 @@ crypto_scalarmult_BYTES()
     OUTPUT:
         RETVAL
 
+SV*
+crypto_scalarmult_curve25519_BYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_scalarmult_curve25519_BYTES);
+    OUTPUT:
+        RETVAL
+
 SV *
 crypto_pwhash_PASSWD_MIN()
     CODE:
-        RETVAL = newSVuv((unsigned int) 0);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_PASSWD_MIN);
     OUTPUT:
         RETVAL
 
 SV *
 crypto_pwhash_PASSWD_MAX()
     CODE:
-        RETVAL = newSVuv((unsigned int) 4294967295);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_PASSWD_MAX);
     OUTPUT:
         RETVAL
 
 SV *
 crypto_pwhash_BYTES_MIN()
     CODE:
-        RETVAL = newSVuv((unsigned int) 16);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_BYTES_MIN);
     OUTPUT:
         RETVAL
         
 SV *
 crypto_pwhash_BYTES_MAX()
     CODE:
-        RETVAL = newSVuv((unsigned int) 4294967295);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_BYTES_MAX);
     OUTPUT:
         RETVAL
 
 SV *
 crypto_pwhash_STRBYTES()
     CODE:
-        RETVAL = newSVuv((unsigned int) 128);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_STRBYTES);
     OUTPUT:
         RETVAL
         
 SV *
 crypto_pwhash_OPSLIMIT_MIN()
     CODE:
-        RETVAL = newSVuv((unsigned int) 3);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_OPSLIMIT_MIN);
     OUTPUT:
         RETVAL
         
 SV *
 crypto_pwhash_OPSLIMIT_MAX()
     CODE:
-        RETVAL = newSVuv((unsigned int) 4294967295);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_OPSLIMIT_MAX);
     OUTPUT:
         RETVAL
         
 SV *
 crypto_pwhash_MEMLIMIT_MIN()
     CODE:
-        RETVAL = newSVuv((unsigned int) 8192);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_MEMLIMIT_MIN);
     OUTPUT:
         RETVAL
         
 SV *
 crypto_pwhash_MEMLIMIT_MAX()
     CODE:
-        RETVAL = newSVuv((unsigned int) (SIZE_MAX >= 4398046510080U) ? 4398046510080U : (SIZE_MAX >= 2147483648U) ? 2147483648U : 32768U);
+        RETVAL = newSVuv((unsigned int) crypto_pwhash_MEMLIMIT_MAX);
     OUTPUT:
         RETVAL
 
