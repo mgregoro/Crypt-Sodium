@@ -146,14 +146,14 @@ crypto_sign_SECRETKEYBYTES()
 SV *
 crypto_sign_ed25519_PUBLICKEYBYTES()
     CODE:
-        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_PUBLICKEYBYTES)
+        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_PUBLICKEYBYTES);
     OUTPUT:
         RETVAL
         
 SV *
 crypto_sign_ed25519_SECRETKEYBYTES()
     CODE:
-        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_SECRETKEYBYTES)
+        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_SECRETKEYBYTES);
     OUTPUT:
         RETVAL
 
