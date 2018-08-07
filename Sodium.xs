@@ -142,20 +142,6 @@ crypto_sign_SECRETKEYBYTES()
 
     OUTPUT:
         RETVAL
-        
-SV *
-crypto_sign_ed25519_PUBLICKEYBYTES()
-    CODE:
-        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_PUBLICKEYBYTES)
-    OUTPUT:
-        RETVAL
-        
-SV *
-crypto_sign_ed25519_SECRETKEYBYTES()
-    CODE:
-        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_SECRETKEYBYTES)
-    OUTPUT:
-        RETVAL
 
 SV *
 crypto_pwhash_scryptsalsa208sha256_SALTBYTES()
@@ -324,12 +310,7 @@ crypto_scalarmult_BYTES()
     OUTPUT:
         RETVAL
 
-SV*
-crypto_scalarmult_curve25519_BYTES()
-    CODE:
-        RETVAL = newSVuv((unsigned int) crypto_scalarmult_curve25519_BYTES);
-    OUTPUT:
-        RETVAL
+#ifdef P5CS_CPWH
 
 SV *
 crypto_pwhash_PASSWD_MIN()
@@ -394,6 +375,72 @@ crypto_pwhash_MEMLIMIT_MAX()
     OUTPUT:
         RETVAL
 
+#endif
+SV *
+crypto_shorthash_BYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_shorthash_BYTES);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_shorthash_KEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_shorthash_KEYBYTES);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_shorthash_siphash24_BYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_shorthash_siphash24_BYTES);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_shorthash_siphash24_KEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_shorthash_siphash24_KEYBYTES);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_shorthash_siphashx24_BYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_shorthash_siphashx24_BYTES);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_shorthash_siphashx24_KEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_shorthash_siphashx24_KEYBYTES);
+    OUTPUT:
+        RETVAL
+
+#ifdef P5CS_KG_VAR
+SV*
+crypto_scalarmult_curve25519_BYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_scalarmult_curve25519_BYTES);
+    OUTPUT:
+        RETVAL
+
+SV *
+crypto_sign_ed25519_PUBLICKEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_PUBLICKEYBYTES);
+    OUTPUT:
+        RETVAL
+        
+SV *
+crypto_sign_ed25519_SECRETKEYBYTES()
+    CODE:
+        RETVAL = newSVuv((unsigned int) crypto_sign_ed25519_SECRETKEYBYTES);
+    OUTPUT:
+        RETVAL
+
+#endif
 SV *
 real_sodium_init()
     CODE:
@@ -597,17 +644,38 @@ real_crypto_secretbox(m, mlen, n, sk)
         RETVAL
 
 SV *
+real_crypto_shorthash(in, inlen, key)
+    unsigned char * in
+    unsigned long inlen
+    unsigned char * key
+    
+    CODE:
+        unsigned char out[crypto_shorthash_BYTES];
+        int status = crypto_shorthash(out, in, (unsigned long long) inlen, key);
+        
+        if (status == 0) {
+            RETVAL = newSVpvn(out, crypto_hash_BYTES);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
+        
+    OUTPUT:
+        RETVAL
+        
+SV *
 real_crypto_hash(in, inlen)
     unsigned char * in
     unsigned long inlen
 
     CODE:
         unsigned char out[crypto_hash_BYTES];
-        crypto_hash(out, in, (unsigned long long) inlen);
-
-        // returning unsigned char * was truncating the data on NUL bytes, pack it 
-        // in to an SV like this:
-        RETVAL = newSVpvn(out, crypto_hash_BYTES);
+        int status = crypto_hash(out, in, (unsigned long long) inlen);
+        
+        if (status == 0) {
+            RETVAL = newSVpvn(out, crypto_hash_BYTES);
+        } else {
+            RETVAL = &PL_sv_undef;
+        }
     
     OUTPUT:
         RETVAL

@@ -76,6 +76,7 @@ if (scalar(keys %$c) > 0) {
             $c->{includedir} = join(' ', uniq(split/ /, Alien::Sodium->cflags));
         }
         
+        $c->{modversion} = '1.0.8';
         write_ver_file();
         $config{DEFINE} .= " -DP5CS_LIBMAJ=1 -DP5CS_LIBMIN=0 -DP5CS_LIBREV=8 -DP5CS_LIBVER=" . '\"1.0.8\"';
     }
@@ -93,10 +94,14 @@ if ($c->{includedir}) {
     $config{INC} = "-I.";
 }
 
+$config{DEFINE} .= " " . extra_define_flags($c->{modversion});
+
+print "\n";
+
 WriteMakefile(%config);
 
 if ($i >= 3) {
-    print "\n[ :D ] Found libsodium $c->{modversion} in $c->{libdir}; headers in $c->{includedir}";
+    print "\n[ :D ] Found libsodium $c->{modversion} in $c->{libdir}";
     if ($i == 3) {
         print " .. using unconventional means.";
     } elsif ($i == 4) {
@@ -114,6 +119,78 @@ if ($i >= 3) {
     } else {
         print "If you're sure you have libsodium 1.0.8 or higher installed, please run 'make' and 'make test' to build Crypt::Sodium\n\n";
     }
+}
+
+sub extra_define_flags {
+    my ($lsv) = @_;
+    
+    my @edefs;
+    # version 1.0.9
+    # introduced crypto_pwhash_argon2i
+    push(@edefs, "-D" . enable_feature(
+        '1.0.9',
+        P5CS_CPWH => "crypto_pwhash namespace introduced for password hashing functionality", 
+    ));
+    # introduced "speed record" BLAKE2b and state
+    push(@edefs, "-D" . enable_feature(
+        '1.0.9',
+        P5CS_GH_BLAKE2B => "crypto_generichash_blake2bxx functionality", 
+    ));
+    # introduced "speed record" BLAKE2b and state
+    push(@edefs, "-D" . enable_feature(
+        '1.0.9',
+        P5CS_GH_BLAKE2B => "crypto_generichash_blake2bxx functionality", 
+    ));
+    
+    # version 1.0.12
+    # introduced multiple _keygen() variants for the different algorithms
+    push(@edefs, "-D" . enable_feature(
+        '1.0.12',
+        P5CS_KG_VAR => "xx_keygen and xx_keypair variants present for various algorithms",
+    ));
+    # introduced ed25519ph; multi-part signature API
+    push(@edefs, "-D" . enable_feature(
+        '1.0.12',
+        P5CS_ED25519PH => "Ed25519ph multi-part signature algorithm functionality",
+    ));
+    # crypto_kdf present in 1.0.12
+    push(@edefs, "-D" . enable_feature(
+        '1.0.12',
+        P5CS_CKDF => "crypto_kdf namespace available for key derivation functionality",
+    ));
+    # randombytes_buf_deterministic in 1.0.12
+    push(@edefs, "-D" . enable_feature(
+        '1.0.12',
+        P5CS_DRNG => "randombytes_buf_deterministic psuedo random number generator",
+    ));
+
+    return join(' ', @edefs);    
+}
+
+sub enable_feature {
+    my ($reqver, $def, $desc) = @_;
+
+    my $enable;
+    if (vercmp($c->{modversion}, $reqver)) {
+        print "[ +++ ] feature $def - ENABLED";
+        $enable = 1;
+    } else {
+        print "[ --- ] feature $def - DSABLED";
+    }
+    if ($desc) {
+        print " - $desc";
+    }
+    print " - req v$reqver or higher; have v$c->{modversion}\n";
+    
+    return $enable ? $def : undef;
+}
+
+sub vercmp {
+    my ($ay, $be) = map { join('', map { $_ * 100 } split(/\./, $_)) } @_;
+    if ($ay > $be) {
+        return 1;
+    }
+    return undef;
 }
 
 sub write_ver_file {

@@ -28,6 +28,7 @@ our @EXPORT = qw/
     real_crypto_sign_open
     real_crypto_box
     real_crypto_hash
+    real_crypto_shorthash
     real_crypto_box_open
     real_crypto_secretbox
     real_crypto_secretbox_open
@@ -48,6 +49,7 @@ our @EXPORT = qw/
     crypto_generichash_update
     crypto_generichash_final
     crypto_generichash_statebytes
+    crypto_shorthash
     crypto_stream
     crypto_stream_xor
     crypto_box_keypair
@@ -105,6 +107,8 @@ our @EXPORT = qw/
     crypto_generichash_BYTES
     crypto_generichash_BYTES_MIN
     crypto_generichash_BYTES_MAX
+    crypto_shorthash_BYTES
+    crypto_shorthash_KEYBYTES
     crypto_scalarmult_SCALARBYTES
     crypto_scalarmult_BYTES
     crypto_pwhash_PASSWD_MIN
@@ -142,6 +146,8 @@ use subs qw/
     crypto_sign_PUBLICKEYBYTES
     crypto_sign_SECRETKEYBYTES
     crypto_sign_BYTES
+    crypto_sign_ed25519_PUBLICKEYBYTES
+    crypto_sign_ed25519_SECRETKEYBYTES
     crypto_pwhash_scryptsalsa208sha256_SALTBYTES
     crypto_pwhash_scryptsalsa208sha256_OPSLIMIT
     crypto_pwhash_scryptsalsa208sha256_MEMLIMIT
@@ -257,6 +263,11 @@ sub crypto_stream_xor {
 sub crypto_hash {
     my ($to_hash) = @_;
     return real_crypto_hash($to_hash, length($to_hash));
+}
+
+sub crypto_shorthash {
+    my ($to_hash, $key) = @_;
+    return real_crypto_shorthash($to_hash, length($to_hash), $key);
 }
 
 sub crypto_generichash {

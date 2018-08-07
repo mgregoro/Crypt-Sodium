@@ -179,5 +179,11 @@ ok(!crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "wrong data", $xchacha
 ok(!crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "additional data", "Wrong Nonce", $xchacha_key), "xchacha/poly1035 decryption failed with bad nonce");
 ok(!crypto_aead_xchacha20poly1305_ietf_decrypt($ciphered, "additional data", $xchacha_nonce, "Wrong key"), "xchacha/poly1035 decryption failed with bad key");
 
+my $shk = randombytes_buf(crypto_shorthash_KEYBYTES);
+my $short_hashed = crypto_shorthash("I can't get no...", $shk);
+is(crypto_shorthash("I can't get no...", $shk), $short_hashed, "short hashes of the same content using the same key match");
+isnt(crypto_shorthash("I can't get no...", randombytes_buf(crypto_shorthash_KEYBYTES)), $short_hashed, "short hashes of the same content using different keys don't match");
+isnt(crypto_shorthash("Satisfaction", $shk), $short_hashed, "short hashes of different content using the same key don't match");
+
 done_testing();
 
