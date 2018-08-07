@@ -1,5 +1,8 @@
-Crypt-Sodium version 0.12
-=========================
+## Note: GitHub Repository is a mirror of 
+
+https://git.mg2.org/mikeyg/Crypt-Sodium
+
+# Crypt-Sodium version 0.12
 
 Simple wrapper around NaCL functions as provided by libsodium.  crypto_box, crypto_stream, crypto_hash,
 and crypto_sign are all present and accounted for.  None of the specific implementations are exposed,
