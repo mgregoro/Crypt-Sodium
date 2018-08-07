@@ -9,6 +9,12 @@ and crypto_sign are all present and accounted for.  None of the specific impleme
 only the default implementations are, so please refer to your version of libsodium's release notes if 
 you need to know what implementation you are using.
 
+An attempt to adhere to the API provided by libsodium (inspired by NaCL) is made, but is broken wherever
+an opportunity to be 'perlish' presented itself.  Don't expect to have to pass in or keep track of 
+ciphertext or message lengths.  Should the convenience of the Perl API frustrate you, please note that
+the *real* versions of the corresponding functions are available with the `real_` prefix.  e.g.
+`real_crypto_stream_xor()`
+
 A crude attempt to detect your version of libsodium using `pkg-config` and by inspecting canonical dirs
 is made.  Falls back to the *minimum* level of support - `1.0.8`.  To troubleshoot feature detection run:
 

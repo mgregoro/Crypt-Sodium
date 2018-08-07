@@ -273,6 +273,8 @@ sub crypto_shorthash {
 sub crypto_generichash {
     my ($to_hash, $outlen) = @_;
 
+    $outlen //= crypto_generichash_BYTES_MAX;
+
     unless (($outlen >= crypto_generichash_BYTES_MIN) &&
    	    ($outlen <= crypto_generichash_BYTES_MAX)) {
         die "[fatal]: key must be between " . crypto_generichash_BYTES_MIN . " and " . crypto_generichash_BYTES_MAX . " bytes long.\n";
@@ -309,7 +311,12 @@ sub crypto_generichash_init {
         }
     }
 
-    $hash_size = 64 unless $hash_size;
+    $hash_size //= crypto_generichash_BYTES_MAX;
+
+    unless (($hash_size >= crypto_generichash_BYTES_MIN) &&
+        ($hash_size <= crypto_generichash_BYTES_MAX)) {
+        die "[fatal]: key must be between " . crypto_generichash_BYTES_MIN . " and " . crypto_generichash_BYTES_MAX . " bytes long.\n";
+    }
 
     no warnings 'uninitialized';
 
@@ -477,7 +484,7 @@ sub crypto_pwhash {
         $memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE;
     }
 
-    my $output = real_crypto_pwhash($outlen, $password, length($password), $salt, $opslimit, $memlimit, $alg);
+    return real_crypto_pwhash($outlen, $password, length($password), $salt, $opslimit, $memlimit, $alg);
 }
 
 sub crypto_pwhash_str {
