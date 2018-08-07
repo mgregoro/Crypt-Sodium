@@ -1,5 +1,5 @@
 {
-   "abstract" : "Perl stub for libsodium",
+   "abstract" : "Simple wrapper around NaCL functions provided by libsodium",
    "author" : [
       "Michael Gregorowicz <mike@mg2.org>"
    ],

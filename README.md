@@ -9,22 +9,27 @@ and crypto_sign are all present and accounted for.  None of the specific impleme
 only the default implementations are, so please refer to your version of libsodium's release notes if 
 you need to know what implementation you are using.
 
-INSTALLATION
+A crude attempt to detect your version of libsodium using `pkg-config` and by inspecting canonical dirs
+is made.  Falls back to the *minimum* level of support - `1.0.8`.  To troubleshoot feature detection run:
+
+`perl Makefile.PL verbose`
+
+### INSTALLATION
 
 To install this module type the following:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+    perl Makefile.PL
+    make
+    make test
+    make install
 
-DEPENDENCIES
+### DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  libsodium (download.libsodium.org/libsodium/releases/)
+  [libsodium](https://download.libsodium.org/libsodium/releases/)
 
-COPYRIGHT AND LICENCE
+### COPYRIGHT AND LICENCE
 
 Copyright (C) 2018 by Michael Gregorowicz
 

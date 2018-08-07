@@ -7,6 +7,8 @@ use File::Basename qw/dirname/;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
+my $verbose = defined $ARGV[0] && $ARGV[0] eq "verbose";
+
 my $c = {};
 chomp(my $pc = `which pkg-config`);
 if ($pc) {
@@ -96,28 +98,28 @@ if ($c->{includedir}) {
 
 $config{DEFINE} .= " " . extra_define_flags($c->{modversion});
 
-print "\n";
+print "\n" if $verbose;
 
 WriteMakefile(%config);
 
 if ($i >= 3) {
-    print "\n[ :D ] Found libsodium $c->{modversion} in $c->{libdir}";
+    print "\n[ :D ] Found libsodium $c->{modversion} in $c->{libdir}" if $verbose;
     if ($i == 3) {
-        print " .. using unconventional means.";
+        print " .. using unconventional means." if $verbose;
     } elsif ($i == 4) {
-        print " .. using pkg-config.";
+        print " .. using pkg-config." if $verbose;
     }
-    print "\n";
-    print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n";
+    print "\n" if $verbose;
+    print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n" if $verbose;
 } elsif ($i == 2) {
-    print "\n[ :| ] Found Alien::Sodium -- Assuming it provides libsodium v1.0.8\n";
-    print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n";
+    print "\n[ :| ] Found Alien::Sodium -- Assuming it provides libsodium v1.0.8\n" if $verbose;
+    print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n" if $verbose;
 } else {
-    print "\n[ :| ] Couldn't find pkg-config or pkg-config info for libsodium... assuming minimum v1.0.8\n";
+    print "\n[ :| ] Couldn't find pkg-config or pkg-config info for libsodium... assuming minimum v1.0.8\n" if $verbose;
     if ($c->{includedir}) {
-        print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n";
+        print "Please run 'make' and 'make test' to build Crypt::Sodium\n\n" if $verbose;
     } else {
-        print "If you're sure you have libsodium 1.0.8 or higher installed, please run 'make' and 'make test' to build Crypt::Sodium\n\n";
+        print "If you're sure you have libsodium 1.0.8 or higher installed, please run 'make' and 'make test' to build Crypt::Sodium\n\n" if $verbose;
     }
 }
 
@@ -172,15 +174,15 @@ sub enable_feature {
 
     my $enable;
     if (vercmp($c->{modversion}, $reqver)) {
-        print "[ +++ ] feature $def - ENABLED";
+        print "[ +++ ] feature $def - ENABLED" if $verbose;
         $enable = 1;
     } else {
-        print "[ --- ] feature $def - DSABLED";
+        print "[ --- ] feature $def - DSABLED" if $verbose;
     }
     if ($desc) {
-        print " - $desc";
+        print " - $desc" if $verbose;
     }
-    print " - req v$reqver or higher; have v$c->{modversion}\n";
+    print " - req v$reqver or higher; have v$c->{modversion}\n" if $verbose;
     
     return $enable ? $def : undef;
 }

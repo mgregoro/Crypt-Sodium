@@ -1,10 +1,15 @@
 Crypt-Sodium version 0.12
 =========================
 
-Simple wrapper around NaCL functions as provided by libsodium.  crypto_box, crypto_stream, crypto_hash,
+Simple wrapper around NaCL functions provided by libsodium.  crypto_box, crypto_stream, crypto_hash,
 and crypto_sign are all present and accounted for.  None of the specific implementations are exposed,
 only the default implementations are, so please refer to your version of libsodium's release notes if 
 you need to know what implementation you are using.
+
+A crude attempt to detect your version of libsodium using pkg-config and by inspecting canonical dirs
+is made.  Falls back to "minimum" level of support - 1.0.8.  To troubleshoot feature detection run:
+
+perl Makefile.PL verbose
 
 INSTALLATION
 

@@ -1,11 +1,18 @@
 ---
-abstract: 'Perl stub for libsodium'
+abstract: 'Simple wrapper around NaCL functions provided by libsodium'
 author:
   - 'Michael Gregorowicz <mike@mg2.org>'
 build_requires:
   ExtUtils::MakeMaker: 0
 configure_requires:
   ExtUtils::MakeMaker: 0
+provides:
+  Crypt::Sodium:
+    file: lib/Crypt/Sodium.pm
+  Crypt::Sodium::GenericHash::State:
+    file: lib/Crypt/Sodium/GenericHash/State.pm
+  Crypt::Sodium::GenericHashBlake2B:
+    file: lib/Crypt/Sodium/GenericHashBlake2B/State.pm
 dynamic_config: 1
 generated_by: 'ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.120921'
 license: unknown
