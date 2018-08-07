@@ -1,6 +1,7 @@
 Changes
 lib/Crypt/Sodium.pm
 lib/Crypt/Sodium/GenericHash/State.pm
+lib/Crypt/Sodium/GenericHashBlake2B/State.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
